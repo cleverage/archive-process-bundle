@@ -22,4 +22,5 @@ CleverAge\ArchiveProcessBundle\CleverAgeArchiveProcessBundle::class => ['all' =>
 ## Reference
 
 - Tasks
-  - @TODO
+  - [UnzipTask](reference/tasks/unzip_task.md)
+  - [ZipTask](reference/tasks/zip_task.md)

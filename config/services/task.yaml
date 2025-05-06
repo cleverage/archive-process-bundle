@@ -1,1 +1,14 @@
 services:
+    cleverage_archive_process.task.unzip:
+        class: CleverAge\ArchiveProcessBundle\Task\UnzipTask
+        shared: false
+    CleverAge\ArchiveProcessBundle\Task\UnzipTask:
+        alias: cleverage_archive_process.task.unzip
+        public: true
+
+    cleverage_archive_process.task.zip:
+        class: CleverAge\ArchiveProcessBundle\Task\ZipTask
+        shared: false
+    CleverAge\ArchiveProcessBundle\Task\ZipTask:
+        alias: cleverage_archive_process.task.zip
+        public: true
