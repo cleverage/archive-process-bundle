@@ -65,6 +65,7 @@ class UnzipTask extends AbstractConfigurableTask
     /**
      * @return array{filename: string, destination: string}|null
      */
+    #[\Override]
     protected function getOptions(ProcessState $state): ?array
     {
         if (null === $this->options && \is_array($state->getInput())) {

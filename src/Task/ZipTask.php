@@ -75,6 +75,7 @@ class ZipTask extends AbstractConfigurableTask
     /**
      * @return array{filename: string, files: array<string>|string, files_base_path: string}|null
      */
+    #[\Override]
     protected function getOptions(ProcessState $state): ?array
     {
         if (null === $this->options && \is_array($state->getInput())) {
