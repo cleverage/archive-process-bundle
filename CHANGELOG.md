@@ -1,6 +1,9 @@
 Latest
 ------
 
+v2.1
+------
+
 ### Changes
 * [#10](https://github.com/cleverage/archive-process-bundle/issues/10) Update quality stack: use Rector `withComposerBased()` sets (removed `SYMFONY_64` / `PHPUNIT_100` sets), declare used Symfony packages and PHPUnit range in composer.json, apply quality tools fixes
 * [#12](https://github.com/cleverage/archive-process-bundle/issues/12) Add missing documentations: complete reference pages for every Task, complete index and cookbooks. Harmonize and fix existing documentation.
