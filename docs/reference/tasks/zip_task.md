@@ -86,7 +86,9 @@ Notes
 -----
 
 * Underlying class is [ZipArchive](https://www.php.net/manual/en/class.ziparchive.php), the archive is opened with the
-  `ZipArchive::CREATE | ZipArchive::OVERWRITE` flags. A `\RuntimeException` is thrown if it cannot be opened.
+  `ZipArchive::CREATE | ZipArchive::OVERWRITE` flags. A `\RuntimeException` is thrown if it cannot be opened (with the
+  `ZipArchive` error code), or written once all files are added (e.g. when the parent directory of `filename` does not
+  exist, the directory is not created).
 * For each file, the entry name is the file path with the leading `files_base_path` removed (only when the path starts
   with it, followed by a directory separator) and leading directory separators trimmed; the file actually read is
   `files_base_path` + directory separator + entry name. Hence all files must be located under `files_base_path`.

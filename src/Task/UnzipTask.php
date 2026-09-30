@@ -45,11 +45,17 @@ class UnzipTask extends AbstractConfigurableTask
 
         $zipArchive = new \ZipArchive();
         $res = $zipArchive->open($filename);
-        if (true === $res) {
-            $zipArchive->extractTo($dest);
-            $zipArchive->close();
-        } else {
-            throw new \RuntimeException("Unable to open file {$filename}");
+        if (true !== $res) {
+            throw new \RuntimeException("Unable to open file {$filename} with code {$res}");
+        }
+
+        // The PHP warning is replaced by the exception below
+        error_clear_last();
+        $extracted = @$zipArchive->extractTo($dest);
+        $error = error_get_last()['message'] ?? $zipArchive->getStatusString();
+        $zipArchive->close();
+        if (!$extracted) {
+            throw new \RuntimeException("Unable to extract file {$filename} to {$dest}: {$error}");
         }
 
         $state->setOutput($dest);

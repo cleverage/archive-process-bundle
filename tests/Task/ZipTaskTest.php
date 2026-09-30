@@ -99,6 +99,23 @@ class ZipTaskTest extends TestCase
         self::assertSame(['file1.txt', ltrim($this->dir, '/').'/file2.txt'], $this->getEntries($this->dir.'/archive.zip'));
     }
 
+    public function testWriteFailure(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/missing_directory/archive.zip',
+            'files' => 'file1.txt',
+            'files_base_path' => $this->dir,
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('A \RuntimeException should have been thrown');
+        } catch (\RuntimeException $e) {
+            self::assertStringStartsWith("Unable to write zip file {$this->dir}/missing_directory/archive.zip: Failure to create temporary file", $e->getMessage());
+        }
+        self::assertNull($state->getOutput());
+    }
+
     /**
      * @param array<string, mixed> $options
      *

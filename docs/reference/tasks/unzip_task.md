@@ -77,7 +77,9 @@ Notes
 * Underlying method is [ZipArchive::extractTo()](https://www.php.net/manual/en/ziparchive.extractto.php): the whole
   archive is extracted, existing files with the same name are overwritten and other files already present in the
   destination directory are kept.
-* A `\RuntimeException` is thrown if the file cannot be opened as a zip archive.
+* A `\RuntimeException` is thrown if the file cannot be opened as a zip archive (with the `ZipArchive` error code,
+  e.g. `19` for `ZipArchive::ER_NOZIP`), or cannot be extracted (e.g. `destination` is not writable or is a file). In
+  the latter case, the files extracted before the failure are kept.
 * Options are resolved on each execution of the task: when the task receives several inputs (e.g. after an iterable
   task), each input is extracted with its own `filename` and `destination`.
 * See the [Import the CSV files of an uploaded archive](../../cookbooks/import_archive.md) cookbook.

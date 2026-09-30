@@ -67,7 +67,10 @@ class ZipTask extends AbstractConfigurableTask
             }
         }
 
-        $zip->close();
+        // The archive is written on close: the PHP warning is replaced by the exception below
+        if (!@$zip->close()) {
+            throw new \RuntimeException("Unable to write zip file {$options['filename']}: {$zip->getStatusString()}");
+        }
 
         $state->setOutput($options['filename']);
     }
