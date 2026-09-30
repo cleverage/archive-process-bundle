@@ -27,6 +27,9 @@ class ZipTask extends AbstractConfigurableTask
         if (null === $state->getInput()) {
             $state->setInput([]);
         }
+        if (!\is_array($state->getInput())) {
+            throw new \UnexpectedValueException(\sprintf('ZipTask expects an array or null input, %s given', get_debug_type($state->getInput())));
+        }
         /**
          * @var array{filename: string, files: array<string>|string, files_base_path: string} $options
          */

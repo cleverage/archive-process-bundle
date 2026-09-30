@@ -17,7 +17,7 @@ configured ones. It may only contain the `filename`, `files` and/or `files_base_
 `UndefinedOptionsException`). A `null` input is handled as an empty array, so the options come from the task
 configuration only.
 
-Any other input type (e.g. a `string` file path) is not supported: convert it into an array first, for instance with a
+Any other input type (e.g. a `string` file path) is not supported and throws an `\UnexpectedValueException`: convert it into an array first, for instance with a
 [TransformerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/transformer_task.md) and
 the [wrapper](https://github.com/cleverage/process-bundle/blob/main/docs/reference/transformers/wrapper_transformer.md)
 transformer (`wrapper_key: files`).

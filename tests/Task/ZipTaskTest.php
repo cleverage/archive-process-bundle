@@ -116,6 +116,18 @@ class ZipTaskTest extends TestCase
         self::assertNull($state->getOutput());
     }
 
+    public function testNonArrayInput(): void
+    {
+        [$task, $state] = $this->createTask([]);
+
+        try {
+            $this->execute($task, $state, 'file.zip');
+            self::fail('An \UnexpectedValueException should have been thrown');
+        } catch (\UnexpectedValueException $e) {
+            self::assertSame('ZipTask expects an array or null input, string given', $e->getMessage());
+        }
+    }
+
     /**
      * @param array<string, mixed> $options
      *
