@@ -1,41 +1,84 @@
 UnzipTask
-===============
+=========
 
-Unzip a file, requires the destination path in options.
+Extracts the whole content of a zip archive into a destination directory, then outputs this directory path.
+Typical use case: extract an archive received from a partner (upload, SFTP, ...) before browsing and reading its files.
 
 Task reference
 --------------
 
-* **Task Service**: `CleverAge\ArchiveProcessBundle\Task\UnzipTask`
+* **Service**: `CleverAge\ArchiveProcessBundle\Task\UnzipTask`
 
 Accepted inputs
 ---------------
 
-`array`: inputs are merged with task defined options.
+`array` or `null`: the input array is merged with the task options, input values taking precedence over the
+configured ones. It may only contain the `filename` and/or `destination` keys (any other key throws an
+`UndefinedOptionsException`). A `null` input is handled as an empty array, so the options come from the task
+configuration only.
+
+Any other input type (e.g. a `string` file path) is not supported: convert it into an array first, for instance with a
+[TransformerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/transformer_task.md) and
+the [wrapper](https://github.com/cleverage/process-bundle/blob/main/docs/reference/transformers/wrapper_transformer.md)
+transformer (`wrapper_key: filename`).
 
 Possible outputs
 ----------------
 
-`string`: the destination directory where zip file was extracted.
+`string`: the `destination` directory where the archive was extracted.
 
 Options
 -------
 
-| Code          | Type     | Required | Default  | Description                                           |
-|---------------|----------|:--------:|----------|-------------------------------------------------------|
-| `filename`    | `string` |  **X**   |          | Zip filename to extract                               |
-| `destination` | `string` |  **X**   |          | Destination directory where zip content was extracted |
+| Code          | Type     | Required | Default | Description                                                                                       |
+|---------------|----------|:--------:|---------|---------------------------------------------------------------------------------------------------|
+| `filename`    | `string` |  **X**   |         | Path of the zip archive to extract. It must exist and be readable (`\UnexpectedValueException`)   |
+| `destination` | `string` |  **X**   |         | Directory where the archive content is extracted                                                  |
+
+Both options are required, but they can be provided either in the task configuration or in the input.
+They are validated when the task is executed, not at process initialization.
 
 Examples
 --------
 
-### Task
+* Extract an archive whose paths are set in the options
 
 ```yaml
 # Task configuration level
-code:
+unzip:
   service: '@CleverAge\ArchiveProcessBundle\Task\UnzipTask'
   options:
     filename: '%kernel.project_dir%/var/data/archive.zip'
     destination: '%kernel.project_dir%/var/data/unzip_archive'
+  outputs: [browse]
 ```
+
+* Provide the paths through the input (e.g. from a previous task), then browse the extracted files
+
+```yaml
+# Task configuration level
+entry:
+  service: '@CleverAge\ProcessBundle\Task\ConstantOutputTask'
+  options:
+    output:
+      filename: '%kernel.project_dir%/var/data/archive.zip'
+      destination: '%kernel.project_dir%/var/data/unzip_archive'
+  outputs: [unzip]
+unzip:
+  service: '@CleverAge\ArchiveProcessBundle\Task\UnzipTask'
+  outputs: [browse]
+browse:
+  service: '@CleverAge\ProcessBundle\Task\File\InputFolderBrowserTask'
+```
+
+Notes
+-----
+
+* Underlying method is [ZipArchive::extractTo()](https://www.php.net/manual/en/ziparchive.extractto.php): the whole
+  archive is extracted, existing files with the same name are overwritten and other files already present in the
+  destination directory are kept.
+* A `\RuntimeException` is thrown if the file cannot be opened as a zip archive.
+* Options are resolved (and cached) on the first execution of the task: when the task receives several inputs during
+  the same process execution (e.g. after an iterable task), the values of the first input are reused for the following
+  ones.
+* See the [Import the CSV files of an uploaded archive](../../cookbooks/import_archive.md) cookbook.

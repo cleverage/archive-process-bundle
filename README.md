@@ -1,5 +1,5 @@
-CleverAge/UiProcessBundle
-=======================
+CleverAge/ArchiveProcessBundle
+==============================
 
 This bundle is a part of the [CleverAge/ProcessBundle](https://github.com/cleverage/process-bundle) project.
 It provides Archive integration on Process bundle.
@@ -12,7 +12,7 @@ For usage documentation, see:
 
 ## Support & Contribution
 
-For general support and questions, please use [Github](https://github.com/cleverage/ui-process-bundle/issues).
+For general support and questions, please use [Github](https://github.com/cleverage/archive-process-bundle/issues).
 If you think you found a bug or you have a feature idea to propose, feel free to open an issue after looking at the [contributing](CONTRIBUTING.md) guide.
 
 ## License
