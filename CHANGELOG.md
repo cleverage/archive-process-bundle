@@ -3,6 +3,7 @@ Latest
 
 ### Fixes
 * [#15](https://github.com/cleverage/archive-process-bundle/issues/15) Fix ZipTask and UnzipTask: resolve the options on every execution, so that each input is used (the options of the first input were reused for the following ones). Update documentation, add tests.
+* [#16](https://github.com/cleverage/archive-process-bundle/issues/16) Fix ZipTask: only remove the leading `files_base_path` from the file paths (every occurrence was removed), and read the files at the given path when `files_base_path` is empty (relative paths were resolved from the filesystem root). Update documentation, add tests.
 
 v2.1
 ------

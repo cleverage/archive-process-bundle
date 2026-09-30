@@ -66,6 +66,39 @@ class ZipTaskTest extends TestCase
         self::assertSame(['file2.txt'], $this->getEntries($this->dir.'/archive2.zip'));
     }
 
+    public function testOnlyTheLeadingBasePathIsRemoved(): void
+    {
+        mkdir($this->dir.'/sub'.$this->dir, 0o777, true);
+        file_put_contents($this->dir.'/sub'.$this->dir.'/file3.txt', 'file 3');
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive.zip',
+            'files' => $this->dir.'/sub'.$this->dir.'/file3.txt',
+            'files_base_path' => $this->dir.'/',
+        ]);
+
+        $this->execute($task, $state, null);
+
+        self::assertSame(['sub'.$this->dir.'/file3.txt'], $this->getEntries($this->dir.'/archive.zip'));
+    }
+
+    public function testRelativePathWithoutBasePath(): void
+    {
+        $cwd = (string) getcwd();
+        chdir($this->dir);
+        try {
+            [$task, $state] = $this->createTask([
+                'filename' => $this->dir.'/archive.zip',
+                'files' => ['file1.txt', $this->dir.'/file2.txt'],
+            ]);
+
+            $this->execute($task, $state, null);
+        } finally {
+            chdir($cwd);
+        }
+
+        self::assertSame(['file1.txt', ltrim($this->dir, '/').'/file2.txt'], $this->getEntries($this->dir.'/archive.zip'));
+    }
+
     /**
      * @param array<string, mixed> $options
      *
