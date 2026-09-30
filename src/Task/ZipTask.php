@@ -78,7 +78,8 @@ class ZipTask extends AbstractConfigurableTask
     #[\Override]
     protected function getOptions(ProcessState $state): ?array
     {
-        if (null === $this->options && \is_array($state->getInput())) {
+        // The options depend on the input: resolve them on every execution
+        if (\is_array($state->getInput())) {
             $resolver = new OptionsResolver();
             $this->configureOptions($resolver);
             $this->options = $resolver->resolve(array_merge($state->getContextualizedOptions() ?? [], $state->getInput()));

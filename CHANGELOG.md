@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Fixes
+* [#15](https://github.com/cleverage/archive-process-bundle/issues/15) Fix ZipTask and UnzipTask: resolve the options on every execution, so that each input is used (the options of the first input were reused for the following ones). Update documentation, add tests.
+
 v2.1
 ------
 
