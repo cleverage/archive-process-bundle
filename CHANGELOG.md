@@ -1,6 +1,9 @@
 Latest
 ------
 
+v2.2
+------
+
 ### Changes
 * [#13](https://github.com/cleverage/archive-process-bundle/issues/13) Add missing tests: ZipTask and UnzipTask (options precedence and validation, missing or unreadable files, overwriting, open failures), bundle and DI extension.
 
