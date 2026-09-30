@@ -27,6 +27,9 @@ class ZipTask extends AbstractConfigurableTask
         if (null === $state->getInput()) {
             $state->setInput([]);
         }
+        if (!\is_array($state->getInput())) {
+            throw new \UnexpectedValueException(\sprintf('ZipTask expects an array or null input, %s given', get_debug_type($state->getInput())));
+        }
         /**
          * @var array{filename: string, files: array<string>|string, files_base_path: string} $options
          */
@@ -42,9 +45,20 @@ class ZipTask extends AbstractConfigurableTask
         if (\is_string($files)) {
             $files = [$files];
         }
+        $basePath = rtrim($options['files_base_path'], \DIRECTORY_SEPARATOR);
         foreach ($files as $file) {
-            $currentFilename = ltrim(str_replace($options['files_base_path'], '', $file), \DIRECTORY_SEPARATOR);
-            $currentFilepath = $options['files_base_path'].\DIRECTORY_SEPARATOR.$currentFilename;
+            if ('' === $options['files_base_path']) {
+                // No base path: the file is read at the given path (absolute or relative to the current directory)
+                $currentFilename = ltrim($file, \DIRECTORY_SEPARATOR);
+                $currentFilepath = $file;
+            } else {
+                // Only the leading base path is removed, other paths are relative to the base path
+                if (str_starts_with($file, $basePath.\DIRECTORY_SEPARATOR)) {
+                    $file = substr($file, \strlen($basePath) + 1);
+                }
+                $currentFilename = ltrim($file, \DIRECTORY_SEPARATOR);
+                $currentFilepath = $basePath.\DIRECTORY_SEPARATOR.$currentFilename;
+            }
             if (!file_exists($currentFilepath)) {
                 throw new \UnexpectedValueException("File does not exists: '{$currentFilepath}'");
             }
@@ -56,7 +70,10 @@ class ZipTask extends AbstractConfigurableTask
             }
         }
 
-        $zip->close();
+        // The archive is written on close: the PHP warning is replaced by the exception below
+        if (!@$zip->close()) {
+            throw new \RuntimeException("Unable to write zip file {$options['filename']}: {$zip->getStatusString()}");
+        }
 
         $state->setOutput($options['filename']);
     }

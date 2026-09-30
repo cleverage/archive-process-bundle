@@ -66,6 +66,51 @@ class UnzipTaskTest extends TestCase
         self::assertFileDoesNotExist($this->dir.'/destination1/file2.txt');
     }
 
+    public function testExtractFailure(): void
+    {
+        file_put_contents($this->dir.'/file.txt', 'not a directory');
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/file.txt',
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('A \RuntimeException should have been thrown');
+        } catch (\RuntimeException $e) {
+            self::assertStringStartsWith("Unable to extract file {$this->dir}/archive1.zip to {$this->dir}/file.txt: ZipArchive::extractTo(", $e->getMessage());
+        }
+        self::assertNull($state->getOutput());
+    }
+
+    public function testOpenFailureGivesTheErrorCode(): void
+    {
+        file_put_contents($this->dir.'/file.txt', 'not a zip archive');
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/file.txt',
+            'destination' => $this->dir.'/destination',
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('A \RuntimeException should have been thrown');
+        } catch (\RuntimeException $e) {
+            self::assertSame("Unable to open file {$this->dir}/file.txt with code ".\ZipArchive::ER_NOZIP, $e->getMessage());
+        }
+    }
+
+    public function testNonArrayInput(): void
+    {
+        [$task, $state] = $this->createTask([]);
+
+        try {
+            $this->execute($task, $state, 'file.zip');
+            self::fail('An \UnexpectedValueException should have been thrown');
+        } catch (\UnexpectedValueException $e) {
+            self::assertSame('UnzipTask expects an array or null input, string given', $e->getMessage());
+        }
+    }
+
     /**
      * @param array<string, mixed> $options
      *

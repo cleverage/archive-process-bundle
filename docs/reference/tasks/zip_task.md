@@ -17,7 +17,7 @@ configured ones. It may only contain the `filename`, `files` and/or `files_base_
 `UndefinedOptionsException`). A `null` input is handled as an empty array, so the options come from the task
 configuration only.
 
-Any other input type (e.g. a `string` file path) is not supported: convert it into an array first, for instance with a
+Any other input type (e.g. a `string` file path) is not supported and throws an `\UnexpectedValueException`: convert it into an array first, for instance with a
 [TransformerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/transformer_task.md) and
 the [wrapper](https://github.com/cleverage/process-bundle/blob/main/docs/reference/transformers/wrapper_transformer.md)
 transformer (`wrapper_key: files`).
@@ -33,7 +33,7 @@ Options
 | Code              | Type              | Required | Default | Description                                                                                                  |
 |-------------------|-------------------|:--------:|---------|--------------------------------------------------------------------------------------------------------------|
 | `filename`        | `string`          |  **X**   |         | Path of the zip archive to create. An existing archive is overwritten                                        |
-| `files`           | `string\|array`   |  **X**   |         | Path of the file, or list of paths of the files, to add to the archive. Paths are relative to `files_base_path`, or absolute and starting with `files_base_path` |
+| `files`           | `string\|array`   |  **X**   |         | Path of the file, or list of paths of the files, to add to the archive. Paths are relative to `files_base_path`, or absolute and starting with `files_base_path` (any path when `files_base_path` is empty) |
 | `files_base_path` | `string`          |          | `''`    | Base directory of the files to add. It is removed from the file paths to build the names of the archive entries |
 
 Options can be provided either in the task configuration or in the input.
@@ -86,13 +86,14 @@ Notes
 -----
 
 * Underlying class is [ZipArchive](https://www.php.net/manual/en/class.ziparchive.php), the archive is opened with the
-  `ZipArchive::CREATE | ZipArchive::OVERWRITE` flags. A `\RuntimeException` is thrown if it cannot be opened.
-* For each file, the entry name is the file path with every occurrence of `files_base_path` removed and leading
-  directory separators trimmed; the file actually read is `files_base_path` + directory separator + entry name.
-  Hence:
-  * all files must be located under `files_base_path`;
-  * with the default empty `files_base_path`, paths must be absolute (a relative path would be resolved from the
-    filesystem root), and the entries keep their full path (without the leading `/`) inside the archive.
+  `ZipArchive::CREATE | ZipArchive::OVERWRITE` flags. A `\RuntimeException` is thrown if it cannot be opened (with the
+  `ZipArchive` error code), or written once all files are added (e.g. when the parent directory of `filename` does not
+  exist, the directory is not created).
+* For each file, the entry name is the file path with the leading `files_base_path` removed (only when the path starts
+  with it, followed by a directory separator) and leading directory separators trimmed; the file actually read is
+  `files_base_path` + directory separator + entry name. Hence all files must be located under `files_base_path`.
+* With the default empty `files_base_path`, the file is read at the given path (absolute, or relative to the current
+  directory), and the entries keep this path (without the leading `/`) inside the archive.
 * Each file must exist and be readable, otherwise an `\UnexpectedValueException` is thrown. Only files can be added:
   directories are not browsed.
 * Options are resolved on each execution of the task: when the task receives several inputs (e.g. after an iterable

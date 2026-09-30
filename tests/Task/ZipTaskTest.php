@@ -66,6 +66,68 @@ class ZipTaskTest extends TestCase
         self::assertSame(['file2.txt'], $this->getEntries($this->dir.'/archive2.zip'));
     }
 
+    public function testOnlyTheLeadingBasePathIsRemoved(): void
+    {
+        mkdir($this->dir.'/sub'.$this->dir, 0o777, true);
+        file_put_contents($this->dir.'/sub'.$this->dir.'/file3.txt', 'file 3');
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive.zip',
+            'files' => $this->dir.'/sub'.$this->dir.'/file3.txt',
+            'files_base_path' => $this->dir.'/',
+        ]);
+
+        $this->execute($task, $state, null);
+
+        self::assertSame(['sub'.$this->dir.'/file3.txt'], $this->getEntries($this->dir.'/archive.zip'));
+    }
+
+    public function testRelativePathWithoutBasePath(): void
+    {
+        $cwd = (string) getcwd();
+        chdir($this->dir);
+        try {
+            [$task, $state] = $this->createTask([
+                'filename' => $this->dir.'/archive.zip',
+                'files' => ['file1.txt', $this->dir.'/file2.txt'],
+            ]);
+
+            $this->execute($task, $state, null);
+        } finally {
+            chdir($cwd);
+        }
+
+        self::assertSame(['file1.txt', ltrim($this->dir, '/').'/file2.txt'], $this->getEntries($this->dir.'/archive.zip'));
+    }
+
+    public function testWriteFailure(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/missing_directory/archive.zip',
+            'files' => 'file1.txt',
+            'files_base_path' => $this->dir,
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('A \RuntimeException should have been thrown');
+        } catch (\RuntimeException $e) {
+            self::assertStringStartsWith("Unable to write zip file {$this->dir}/missing_directory/archive.zip: Failure to create temporary file", $e->getMessage());
+        }
+        self::assertNull($state->getOutput());
+    }
+
+    public function testNonArrayInput(): void
+    {
+        [$task, $state] = $this->createTask([]);
+
+        try {
+            $this->execute($task, $state, 'file.zip');
+            self::fail('An \UnexpectedValueException should have been thrown');
+        } catch (\UnexpectedValueException $e) {
+            self::assertSame('ZipTask expects an array or null input, string given', $e->getMessage());
+        }
+    }
+
     /**
      * @param array<string, mixed> $options
      *
