@@ -22,6 +22,9 @@ use CleverAge\ProcessBundle\Model\ProcessState;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 
 #[CoversClass(UnzipTask::class)]
 class UnzipTaskTest extends TestCase
@@ -109,6 +112,97 @@ class UnzipTaskTest extends TestCase
         } catch (\UnexpectedValueException $e) {
             self::assertSame('UnzipTask expects an array or null input, string given', $e->getMessage());
         }
+    }
+
+    public function testInputOverridesConfiguredOptions(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/configured',
+        ]);
+
+        self::assertSame($this->dir.'/input', $this->execute($task, $state, ['destination' => $this->dir.'/input']));
+        self::assertFileExists($this->dir.'/input/file1.txt');
+        self::assertDirectoryDoesNotExist($this->dir.'/configured');
+    }
+
+    public function testExistingFilesAreOverwrittenOtherFilesAreKept(): void
+    {
+        mkdir($this->dir.'/destination');
+        file_put_contents($this->dir.'/destination/file1.txt', 'old content');
+        file_put_contents($this->dir.'/destination/other.txt', 'other content');
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+        ]);
+
+        $this->execute($task, $state, null);
+
+        self::assertStringEqualsFile($this->dir.'/destination/file1.txt', 'content of file1.txt');
+        self::assertStringEqualsFile($this->dir.'/destination/other.txt', 'other content');
+    }
+
+    public function testMissingFile(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/missing.zip',
+            'destination' => $this->dir.'/destination',
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('An \UnexpectedValueException should have been thrown');
+        } catch (\UnexpectedValueException $e) {
+            self::assertSame("File does not exists: '{$this->dir}/missing.zip'", $e->getMessage());
+        }
+        self::assertNull($state->getOutput());
+    }
+
+    public function testUnreadableFile(): void
+    {
+        chmod($this->dir.'/archive1.zip', 0o000);
+        if (is_readable($this->dir.'/archive1.zip')) {
+            self::markTestSkipped('Files are always readable by root');
+        }
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('An \UnexpectedValueException should have been thrown');
+        } catch (\UnexpectedValueException $e) {
+            self::assertSame("File is not readable: '{$this->dir}/archive1.zip'", $e->getMessage());
+        }
+    }
+
+    public function testOptionsAreValidatedOnExecution(): void
+    {
+        // No exception at initialization: the options may come from the input
+        [$task, $state] = $this->createTask([]);
+
+        $this->expectException(MissingOptionsException::class);
+        $this->execute($task, $state, ['filename' => $this->dir.'/archive1.zip']);
+    }
+
+    public function testUndefinedOptionInInput(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+        ]);
+
+        $this->expectException(UndefinedOptionsException::class);
+        $this->execute($task, $state, ['unknown' => 'value']);
+    }
+
+    public function testInvalidOptionType(): void
+    {
+        [$task, $state] = $this->createTask(['filename' => $this->dir.'/archive1.zip']);
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->execute($task, $state, ['destination' => ['not', 'a', 'string']]);
     }
 
     /**
