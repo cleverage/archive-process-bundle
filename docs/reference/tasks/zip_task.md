@@ -95,9 +95,9 @@ Notes
     filesystem root), and the entries keep their full path (without the leading `/`) inside the archive.
 * Each file must exist and be readable, otherwise an `\UnexpectedValueException` is thrown. Only files can be added:
   directories are not browsed.
-* Options are resolved (and cached) on the first execution of the task: when the task receives several inputs during
-  the same process execution (e.g. after an iterable task), the values of the first input are reused for the following
-  ones. To archive a list of files, aggregate them first (e.g. with an
+* Options are resolved on each execution of the task: when the task receives several inputs (e.g. after an iterable
+  task), each input creates its own archive. To archive a list of files in a single archive, aggregate them first (e.g.
+  with an
   [AggregateIterableTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/aggregate_iterable_task.md))
   and send them all at once in the `files` key.
 * See the [Export, archive and upload a file](../../cookbooks/export_archive_upload.md) cookbook.

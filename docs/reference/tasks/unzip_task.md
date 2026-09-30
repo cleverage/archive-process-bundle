@@ -78,7 +78,6 @@ Notes
   archive is extracted, existing files with the same name are overwritten and other files already present in the
   destination directory are kept.
 * A `\RuntimeException` is thrown if the file cannot be opened as a zip archive.
-* Options are resolved (and cached) on the first execution of the task: when the task receives several inputs during
-  the same process execution (e.g. after an iterable task), the values of the first input are reused for the following
-  ones.
+* Options are resolved on each execution of the task: when the task receives several inputs (e.g. after an iterable
+  task), each input is extracted with its own `filename` and `destination`.
 * See the [Import the CSV files of an uploaded archive](../../cookbooks/import_archive.md) cookbook.
