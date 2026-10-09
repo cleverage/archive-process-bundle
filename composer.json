@@ -39,7 +39,7 @@
   "require": {
     "php": ">=8.2",
     "ext-zip": "*",
-    "cleverage/process-bundle": "^5.0",
+    "cleverage/process-bundle": "^5.0 || ^6.0",
     "symfony/config": "^6.4|^7.4|^8",
     "symfony/dependency-injection": "^6.4|^7.4|^8",
     "symfony/finder": "^6.4|^7.4|^8",
