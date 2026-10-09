@@ -72,19 +72,27 @@ class UnzipTask extends AbstractConfigurableTask
     }
 
     /**
-     * @return array{filename: string, destination: string}|null
+     * The options depend on the input: they are resolved on every execution, not on initialization.
      */
     #[\Override]
-    protected function getOptions(ProcessState $state): ?array
+    public function initialize(ProcessState $state): void
+    {
+    }
+
+    /**
+     * @return array{filename: string, destination: string}
+     */
+    #[\Override]
+    protected function getOptions(ProcessState $state): array
     {
         // The options depend on the input: resolve them on every execution
-        if (\is_array($state->getInput())) {
-            $resolver = new OptionsResolver();
-            $this->configureOptions($resolver);
-            $this->options = $resolver->resolve(array_merge($state->getContextualizedOptions() ?? [], $state->getInput()));
-        }
+        $input = $state->getInput();
+        $resolver = new OptionsResolver();
+        $this->configureOptions($resolver);
+        /** @var array{filename: string, destination: string} $options */
+        $options = $resolver->resolve(array_merge((array) $state->getContextualizedOptions(), \is_array($input) ? $input : []));
+        $this->options = $options;
 
-        // @phpstan-ignore return.type
-        return $this->options;
+        return $options;
     }
 }
