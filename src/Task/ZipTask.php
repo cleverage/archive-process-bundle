@@ -99,7 +99,9 @@ class ZipTask extends AbstractConfigurableTask
         if (\is_array($state->getInput())) {
             $resolver = new OptionsResolver();
             $this->configureOptions($resolver);
-            $this->options = $resolver->resolve(array_merge($state->getContextualizedOptions() ?? [], $state->getInput()));
+            /** @var array<string, mixed> $options */
+            $options = $resolver->resolve(array_merge($state->getContextualizedOptions() ?? [], $state->getInput()));
+            $this->options = $options;
         }
 
         // @phpstan-ignore return.type
