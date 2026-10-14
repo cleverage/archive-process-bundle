@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Changes
+* [#27](https://github.com/cleverage/archive-process-bundle/issues/27) Add a `.gitattributes`: the development files (`.docker/`, `.github/`, `tests/`, quality tools and PHPUnit configurations, `Makefile`) are no longer part of the archive installed by Composer (`dist`).
+
 v2.2
 ------
 
