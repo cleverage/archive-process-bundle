@@ -41,14 +41,14 @@ clever_age_process:
                     outputs: [write]
 
                 write:
-                    service: '@CleverAge\ProcessBundle\Task\File\Csv\CsvWriterTask'
+                    task: csv_writer
                     options:
                         file_path: '%kernel.project_dir%/var/exports/books_{date}.csv'
                         headers: [id, title]
                     outputs: [to_zip_input]
 
                 to_zip_input:
-                    service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+                    task: transformer
                     options:
                         transformers:
                             wrapper:
@@ -56,14 +56,14 @@ clever_age_process:
                     outputs: [zip]
 
                 zip:
-                    service: '@CleverAge\ArchiveProcessBundle\Task\ZipTask'
+                    task: archive.zip
                     options:
                         filename: '%kernel.project_dir%/var/storage/local/books.zip' # Inside the local.storage root
                         files_base_path: '%kernel.project_dir%/var/exports' # The archive entry is 'books_20260930.csv'
                     outputs: [to_storage_path]
 
                 to_storage_path:
-                    service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+                    task: transformer
                     options:
                         transformers:
                             callback:
@@ -79,7 +79,7 @@ clever_age_process:
                     outputs: [log_upload]
 
                 log_upload:
-                    service: '@CleverAge\ProcessBundle\Task\Reporting\LoggerTask'
+                    task: logger
                     options:
                         level: info
                         message: 'Archive uploaded'
