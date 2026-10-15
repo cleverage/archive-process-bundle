@@ -33,7 +33,7 @@ clever_age_process:
                     outputs: [unzip]
 
                 unzip:
-                    task: archive.unzip
+                    task: archive_unzip
                     options:
                         destination: '%kernel.project_dir%/var/imports/archive'
                     outputs: [browse]

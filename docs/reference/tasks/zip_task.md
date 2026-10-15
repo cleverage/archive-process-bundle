@@ -8,7 +8,7 @@ Task reference
 --------------
 
 * **Service**: `CleverAge\ArchiveProcessBundle\Task\ZipTask`
-* **Code**: `archive.zip` (`task: archive.zip`)
+* **Code**: `archive_zip` (`task: archive_zip`)
 
 Accepted inputs
 ---------------
@@ -48,7 +48,7 @@ Examples
 ```yaml
 # Task configuration level
 zip:
-  task: archive.zip
+  task: archive_zip
   options:
     filename: '%kernel.project_dir%/var/data/zip_archive.zip'
     files:
@@ -77,7 +77,7 @@ to_zip_input:
         wrapper_key: files # 'path/to/books_20260930.csv' => { files: 'path/to/books_20260930.csv' }
   outputs: [zip]
 zip:
-  task: archive.zip
+  task: archive_zip
   options:
     filename: '%kernel.project_dir%/var/exports/books.zip'
     files_base_path: '%kernel.project_dir%/var/exports'

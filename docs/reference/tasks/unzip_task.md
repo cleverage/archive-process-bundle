@@ -8,7 +8,7 @@ Task reference
 --------------
 
 * **Service**: `CleverAge\ArchiveProcessBundle\Task\UnzipTask`
-* **Code**: `archive.unzip` (`task: archive.unzip`)
+* **Code**: `archive_unzip` (`task: archive_unzip`)
 
 Accepted inputs
 ---------------
@@ -47,7 +47,7 @@ Examples
 ```yaml
 # Task configuration level
 unzip:
-  task: archive.unzip
+  task: archive_unzip
   options:
     filename: '%kernel.project_dir%/var/data/archive.zip'
     destination: '%kernel.project_dir%/var/data/unzip_archive'
@@ -66,7 +66,7 @@ entry:
       destination: '%kernel.project_dir%/var/data/unzip_archive'
   outputs: [unzip]
 unzip:
-  task: archive.unzip
+  task: archive_unzip
   outputs: [browse]
 browse:
   task: input_folder_browser

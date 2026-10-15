@@ -29,8 +29,8 @@ class CleverAgeArchiveProcessExtensionTest extends TestCase
      */
     public static function provideTasks(): iterable
     {
-        yield 'zip' => [ZipTask::class, 'archive.zip', 'cleverage_archive_process.task.zip'];
-        yield 'unzip' => [UnzipTask::class, 'archive.unzip', 'cleverage_archive_process.task.unzip'];
+        yield 'zip' => [ZipTask::class, 'archive_zip', 'cleverage_archive_process.task.zip'];
+        yield 'unzip' => [UnzipTask::class, 'archive_unzip', 'cleverage_archive_process.task.unzip'];
     }
 
     /**

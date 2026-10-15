@@ -56,7 +56,7 @@ clever_age_process:
                     outputs: [zip]
 
                 zip:
-                    task: archive.zip
+                    task: archive_zip
                     options:
                         filename: '%kernel.project_dir%/var/storage/local/books.zip' # Inside the local.storage root
                         files_base_path: '%kernel.project_dir%/var/exports' # The archive entry is 'books_20260930.csv'

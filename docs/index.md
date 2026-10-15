@@ -30,7 +30,7 @@ CleverAge\ArchiveProcessBundle\CleverAgeArchiveProcessBundle::class => ['all' =>
 ## Configuration
 
 This bundle has no configuration: its tasks are registered as services (non-shared) and are used in your processes by
-their code, `archive.zip` and `archive.unzip` (e.g. `task: archive.zip`, requires `cleverage/process-bundle` 5.4 or
+their code, `archive_zip` and `archive_unzip` (e.g. `task: archive_zip`, requires `cleverage/process-bundle` 5.4 or
 later, see its [task definition](https://github.com/cleverage/process-bundle/blob/main/docs/reference/02-task_definition.md)).
 Referencing them by their class name (`service: '@CleverAge\ArchiveProcessBundle\Task\ZipTask'`) is deprecated since
 `cleverage/process-bundle` 5.4.
