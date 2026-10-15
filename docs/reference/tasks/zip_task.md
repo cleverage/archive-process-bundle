@@ -8,6 +8,7 @@ Task reference
 --------------
 
 * **Service**: `CleverAge\ArchiveProcessBundle\Task\ZipTask`
+* **Code**: `archive_zip` (`task: archive_zip`)
 
 Accepted inputs
 ---------------
@@ -47,7 +48,7 @@ Examples
 ```yaml
 # Task configuration level
 zip:
-  service: '@CleverAge\ArchiveProcessBundle\Task\ZipTask'
+  task: archive_zip
   options:
     filename: '%kernel.project_dir%/var/data/zip_archive.zip'
     files:
@@ -64,19 +65,19 @@ zip:
 ```yaml
 # Task configuration level
 write:
-  service: '@CleverAge\ProcessBundle\Task\File\Csv\CsvWriterTask'
+  task: csv_writer
   options:
     file_path: '%kernel.project_dir%/var/exports/books_{date}.csv'
   outputs: [to_zip_input]
 to_zip_input:
-  service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+  task: transformer
   options:
     transformers:
       wrapper:
         wrapper_key: files # 'path/to/books_20260930.csv' => { files: 'path/to/books_20260930.csv' }
   outputs: [zip]
 zip:
-  service: '@CleverAge\ArchiveProcessBundle\Task\ZipTask'
+  task: archive_zip
   options:
     filename: '%kernel.project_dir%/var/exports/books.zip'
     files_base_path: '%kernel.project_dir%/var/exports'
