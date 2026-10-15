@@ -44,7 +44,10 @@
     "symfony/dependency-injection": "^6.4|^7.4|^8",
     "symfony/finder": "^6.4|^7.4|^8",
     "symfony/http-kernel": "^6.4|^7.4|^8",
-    "symfony/options-resolver": "^6.4|^7.4|^8"
+    "symfony/options-resolver": "^6.4|^7.4|^8",
+    "symfony/polyfill-php83": "^1.33",
+    "symfony/polyfill-php84": "^1.33",
+    "symfony/polyfill-php85": "^1.33"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "*",
