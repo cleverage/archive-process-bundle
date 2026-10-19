@@ -19,6 +19,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Zip files into a given filename.
+ *
+ * @final since 2.3
  */
 class ZipTask extends AbstractConfigurableTask
 {
