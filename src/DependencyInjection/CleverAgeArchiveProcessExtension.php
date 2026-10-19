@@ -17,7 +17,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\Finder\Finder;
 
 class CleverAgeArchiveProcessExtension extends Extension
 {
@@ -27,16 +26,11 @@ class CleverAgeArchiveProcessExtension extends Extension
     }
 
     /**
-     * Recursively import config files into container.
+     * Import the service definition files of a directory into the container.
      */
     protected function findServices(ContainerBuilder $container, string $path, string $extension = 'yaml'): void
     {
-        $finder = new Finder();
-        $finder->in($path)
-            ->name('*.'.$extension)->files();
         $loader = new YamlFileLoader($container, new FileLocator($path));
-        foreach ($finder as $file) {
-            $loader->load($file->getFilename());
-        }
+        $loader->import('*.'.$extension, 'glob');
     }
 }
