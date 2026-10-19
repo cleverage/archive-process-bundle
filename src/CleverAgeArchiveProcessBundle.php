@@ -15,6 +15,9 @@ namespace CleverAge\ArchiveProcessBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * @final since 2.3
+ */
 class CleverAgeArchiveProcessBundle extends Bundle
 {
     #[\Override]

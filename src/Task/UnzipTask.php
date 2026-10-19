@@ -19,6 +19,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Unzip a file, requires the destination path in options.
+ *
+ * @final since 2.3
  */
 class UnzipTask extends AbstractConfigurableTask
 {
