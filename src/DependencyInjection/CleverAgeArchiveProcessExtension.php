@@ -25,6 +25,18 @@ class CleverAgeArchiveProcessExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
+        $keys = array_keys(array_merge(...$configs));
+        if ([] !== $keys) {
+            trigger_deprecation(
+                'cleverage/archive-process-bundle',
+                '2.3',
+                'Configuring "%s" is deprecated, the bundle has no configuration: the keys "%s" are ignored. They will be rejected in 3.0.',
+                $this->getAlias(),
+                implode('", "', $keys),
+            );
+        }
+        $this->processConfiguration(new Configuration(), $configs);
+
         $this->findServices($container, __DIR__.'/../../config/services');
     }
 
