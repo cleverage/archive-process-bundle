@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace CleverAge\ArchiveProcessBundle\Task;
 
+use CleverAge\ArchiveProcessBundle\Exception\RuntimeException;
+use CleverAge\ArchiveProcessBundle\Exception\UnexpectedValueException;
 use CleverAge\ProcessBundle\Model\AbstractConfigurableTask;
 use CleverAge\ProcessBundle\Model\ProcessState;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -30,7 +32,7 @@ class UnzipTask extends AbstractConfigurableTask
             $state->setInput([]);
         }
         if (!\is_array($state->getInput())) {
-            throw new \UnexpectedValueException(\sprintf('UnzipTask expects an array or null input, %s given', get_debug_type($state->getInput())));
+            throw new UnexpectedValueException(\sprintf('UnzipTask expects an array or null input, %s given', get_debug_type($state->getInput())));
         }
         /**
          * @var array{filename: string, destination: string} $options
@@ -39,11 +41,11 @@ class UnzipTask extends AbstractConfigurableTask
         $filename = $options['filename'];
 
         if (!file_exists($filename)) {
-            throw new \UnexpectedValueException("File does not exists: '{$filename}'");
+            throw new UnexpectedValueException("File does not exists: '{$filename}'");
         }
 
         if (!is_readable($filename)) {
-            throw new \UnexpectedValueException("File is not readable: '{$filename}'");
+            throw new UnexpectedValueException("File is not readable: '{$filename}'");
         }
 
         $dest = $options['destination'];
@@ -51,7 +53,7 @@ class UnzipTask extends AbstractConfigurableTask
         $zipArchive = new \ZipArchive();
         $res = $zipArchive->open($filename);
         if (true !== $res) {
-            throw new \RuntimeException("Unable to open file {$filename} with code {$res}");
+            throw new RuntimeException("Unable to open file {$filename} with code {$res}");
         }
 
         // The PHP warning is replaced by the exception below
@@ -60,7 +62,7 @@ class UnzipTask extends AbstractConfigurableTask
         $error = error_get_last()['message'] ?? $zipArchive->getStatusString();
         $zipArchive->close();
         if (!$extracted) {
-            throw new \RuntimeException("Unable to extract file {$filename} to {$dest}: {$error}");
+            throw new RuntimeException("Unable to extract file {$filename} to {$dest}: {$error}");
         }
 
         $state->setOutput($dest);
