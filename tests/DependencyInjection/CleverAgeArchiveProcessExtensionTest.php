@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace CleverAge\ArchiveProcessBundle\Tests\DependencyInjection;
 
 use CleverAge\ArchiveProcessBundle\DependencyInjection\CleverAgeArchiveProcessExtension;
+use CleverAge\ArchiveProcessBundle\DependencyInjection\Configuration;
 use CleverAge\ArchiveProcessBundle\Task\UnzipTask;
 use CleverAge\ArchiveProcessBundle\Task\ZipTask;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -23,6 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Yaml\Yaml;
 
 #[CoversClass(CleverAgeArchiveProcessExtension::class)]
+#[CoversClass(Configuration::class)]
 class CleverAgeArchiveProcessExtensionTest extends TestCase
 {
     public function testEveryServiceDefinitionFileIsLoaded(): void
@@ -95,5 +97,53 @@ class CleverAgeArchiveProcessExtensionTest extends TestCase
             ['package' => 'cleverage/archive-process-bundle', 'version' => '2.3', 'message' => 'The "'.$deprecatedId.'" service alias is deprecated, use the "'.$code.'" task code or the class name of the task instead. It will be removed in 3.0.'],
             $alias->getDeprecation($deprecatedId)
         );
+    }
+
+    public function testConfigurationKeysAreDeprecated(): void
+    {
+        $deprecations = $this->collectDeprecations(static function (): void {
+            (new CleverAgeArchiveProcessExtension())->load([[], ['foo' => true], ['bar' => 1, 'foo' => false]], new ContainerBuilder());
+        });
+
+        self::assertSame(['Since cleverage/archive-process-bundle 2.3: Configuring "clever_age_archive_process" is deprecated, the bundle has no configuration: the keys "foo", "bar" are ignored. They will be rejected in 3.0.'], $deprecations);
+    }
+
+    public function testNoDeprecationWithoutConfigurationKey(): void
+    {
+        $deprecations = $this->collectDeprecations(static function (): void {
+            (new CleverAgeArchiveProcessExtension())->load([[], []], new ContainerBuilder());
+        });
+
+        self::assertSame([], $deprecations);
+    }
+
+    public function testConfigurationHasNoOption(): void
+    {
+        $configuration = (new CleverAgeArchiveProcessExtension())->getConfiguration([], new ContainerBuilder());
+
+        self::assertInstanceOf(Configuration::class, $configuration);
+        self::assertSame('clever_age_archive_process', $configuration->getConfigTreeBuilder()->buildTree()->getName());
+    }
+
+    /**
+     * @param callable(): void $callback
+     *
+     * @return list<string>
+     */
+    private function collectDeprecations(callable $callback): array
+    {
+        $deprecations = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$deprecations): bool {
+            $deprecations[] = $errstr;
+
+            return true;
+        }, \E_USER_DEPRECATED);
+        try {
+            $callback();
+        } finally {
+            restore_error_handler();
+        }
+
+        return $deprecations;
     }
 }

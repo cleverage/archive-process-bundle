@@ -42,6 +42,7 @@
     "cleverage/process-bundle": "^5.0",
     "symfony/config": "^6.4|^7.4|^8",
     "symfony/dependency-injection": "^6.4|^7.4|^8",
+    "symfony/deprecation-contracts": "^2.5|^3",
     "symfony/http-kernel": "^6.4|^7.4|^8",
     "symfony/options-resolver": "^6.4|^7.4|^8",
     "symfony/polyfill-php83": "^1.33",

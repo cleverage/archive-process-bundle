@@ -42,6 +42,8 @@ will be private in 3.0); their former ids, `cleverage_archive_process.task.zip` 
 Both tasks accept their options either from the task configuration or from their input (an array merged with the
 options), which allows computing paths in a previous task.
 
+No option can be configured under `clever_age_archive_process`: a key there is ignored. Configuring one is deprecated since 2.3 (an `E_USER_DEPRECATED` error is triggered when the container is compiled), the keys will be rejected in 3.0.
+
 ## Documentation
 
 - Cookbooks
