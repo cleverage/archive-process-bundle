@@ -37,7 +37,7 @@
     }
   },
   "require": {
-    "php": ">=8.2",
+    "php": "^8.2",
     "ext-zip": "*",
     "cleverage/process-bundle": "^5.0",
     "symfony/config": "^6.4|^7.4|^8",
@@ -64,7 +64,6 @@
   "config": {
     "allow-plugins": {
       "phpstan/extension-installer": true,
-      "symfony/flex": true,
       "symfony/runtime": true
     },
     "sort-packages": true
