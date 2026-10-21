@@ -99,6 +99,32 @@ class CleverAgeArchiveProcessExtensionTest extends TestCase
         );
     }
 
+    public function testEveryTaskIsTested(): void
+    {
+        $container = new ContainerBuilder();
+        (new CleverAgeArchiveProcessExtension())->load([], $container);
+
+        $ids = array_filter(
+            array_keys($container->getDefinitions()),
+            static fn (string $id): bool => str_starts_with($id, 'CleverAge\\ArchiveProcessBundle\\Task\\')
+        );
+        self::assertEqualsCanonicalizing(array_column(iterator_to_array(self::provideTasks()), 0), array_values($ids));
+
+        // Every task has its own code, prefixed by the bridge name
+        $codes = array_column(iterator_to_array(self::provideTasks()), 1);
+        self::assertSame($codes, array_unique($codes));
+        foreach ($codes as $code) {
+            self::assertStringStartsWith('archive_', $code);
+        }
+
+        // Every former id is a deprecated alias
+        $aliases = array_filter(
+            array_keys($container->getAliases()),
+            static fn (string $id): bool => str_starts_with($id, 'cleverage_archive_process.task.')
+        );
+        self::assertEqualsCanonicalizing(array_column(iterator_to_array(self::provideTasks()), 2), array_values($aliases));
+    }
+
     public function testConfigurationKeysAreDeprecated(): void
     {
         $deprecations = $this->collectDeprecations(static function (): void {
