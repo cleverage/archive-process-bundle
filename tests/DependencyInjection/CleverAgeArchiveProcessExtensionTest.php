@@ -131,7 +131,7 @@ class CleverAgeArchiveProcessExtensionTest extends TestCase
             (new CleverAgeArchiveProcessExtension())->load([[], ['foo' => true], ['bar' => 1, 'foo' => false]], new ContainerBuilder());
         });
 
-        self::assertSame(['Since cleverage/archive-process-bundle 2.3: Configuring "clever_age_archive_process" is deprecated, the bundle has no configuration: the keys "foo", "bar" are ignored. They will be rejected in 3.0.'], $deprecations);
+        self::assertSame(['Since cleverage/archive-process-bundle 2.3: Configuring "cleverage_archive_process" is deprecated, the bundle has no configuration: the keys "foo", "bar" are ignored. They will be rejected in 3.0.'], $deprecations);
     }
 
     public function testNoDeprecationWithoutConfigurationKey(): void
@@ -148,7 +148,7 @@ class CleverAgeArchiveProcessExtensionTest extends TestCase
         $configuration = (new CleverAgeArchiveProcessExtension())->getConfiguration([], new ContainerBuilder());
 
         self::assertInstanceOf(Configuration::class, $configuration);
-        self::assertSame('clever_age_archive_process', $configuration->getConfigTreeBuilder()->buildTree()->getName());
+        self::assertSame('cleverage_archive_process', $configuration->getConfigTreeBuilder()->buildTree()->getName());
     }
 
     /**
