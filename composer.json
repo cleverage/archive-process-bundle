@@ -1,72 +1,79 @@
 {
-  "name": "cleverage/archive-process-bundle",
-  "description": "Dedicated bundle for Archive dependencies for the Process Bundle",
-  "keywords": [
-    "process",
-    "task",
-    "etl",
-    "transformation",
-    "archive",
-    "zip",
-    "unzip"
-  ],
-  "homepage": "https://github.com/cleverage/archive-process-bundle",
-  "type": "symfony-bundle",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Nicolas Joubert",
-      "email": "njoubert@clever-age.com",
-      "role": "Lead Developer"
+    "name": "cleverage/archive-process-bundle",
+    "description": "Dedicated bundle for Archive dependencies for the Process Bundle",
+    "keywords": [
+        "process",
+        "task",
+        "etl",
+        "transformation",
+        "archive",
+        "zip",
+        "unzip"
+    ],
+    "homepage": "https://github.com/cleverage/archive-process-bundle",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nicolas Joubert",
+            "email": "njoubert@clever-age.com",
+            "homepage": "https://github.com/njoubert-cleverage",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Xavier Marchegay",
+            "email": "xmarchegay@clever-age.com",
+            "homepage": "https://github.com/xaviermarchegay",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Grégory Tonon",
+            "email": "gtonon@clever-age.com",
+            "homepage": "https://github.com/clever-age-gtonon",
+            "role": "Maintainer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "CleverAge\\ArchiveProcessBundle\\": "src/"
+        }
     },
-    {
-      "name": "Xavier Marchegay",
-      "email": "xmarchegay@clever-age.com",
-      "homepage": "https://github.com/xmarchegay",
-      "role": "Lead Developer"
-    }
-  ],
-  "autoload": {
-    "psr-4": {
-      "CleverAge\\ArchiveProcessBundle\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "CleverAge\\ArchiveProcessBundle\\Tests\\": "tests/"
-    }
-  },
-  "require": {
-    "php": "^8.2",
-    "ext-zip": "*",
-    "cleverage/process-bundle": "^5.0",
-    "symfony/config": "^6.4|^7.4|^8",
-    "symfony/dependency-injection": "^6.4|^7.4|^8",
-    "symfony/deprecation-contracts": "^2.5|^3",
-    "symfony/http-kernel": "^6.4|^7.4|^8",
-    "symfony/options-resolver": "^6.4|^7.4|^8",
-    "symfony/polyfill-php83": "^1.33",
-    "symfony/polyfill-php84": "^1.33",
-    "symfony/polyfill-php85": "^1.33"
-  },
-  "require-dev": {
-    "friendsofphp/php-cs-fixer": "*",
-    "phpstan/extension-installer": "*",
-    "phpstan/phpstan": "*",
-    "phpstan/phpstan-symfony": "*",
-    "phpunit/phpunit": "^10.5|^11|^12|^13",
-    "psr/log": "^2|^3",
-    "rector/rector": "*",
-    "roave/security-advisories": "dev-latest",
-    "symfony/filesystem": "^6.4|^7.4|^8",
-    "symfony/framework-bundle": "^6.4|^7.4|^8",
-    "symfony/test-pack": "^1.1"
-  },
-  "config": {
-    "allow-plugins": {
-      "phpstan/extension-installer": true,
-      "symfony/runtime": true
+    "autoload-dev": {
+        "psr-4": {
+            "CleverAge\\ArchiveProcessBundle\\Tests\\": "tests/"
+        }
     },
-    "sort-packages": true
-  }
+    "require": {
+        "php": "^8.2",
+        "ext-zip": "*",
+        "cleverage/process-bundle": "^5.0",
+        "symfony/config": "^6.4|^7.4|^8",
+        "symfony/dependency-injection": "^6.4|^7.4|^8",
+        "symfony/deprecation-contracts": "^2.5|^3",
+        "symfony/http-kernel": "^6.4|^7.4|^8",
+        "symfony/options-resolver": "^6.4|^7.4|^8",
+        "symfony/polyfill-php83": "^1.33",
+        "symfony/polyfill-php84": "^1.33",
+        "symfony/polyfill-php85": "^1.33"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "*",
+        "phpstan/extension-installer": "*",
+        "phpstan/phpstan": "*",
+        "phpstan/phpstan-symfony": "*",
+        "phpunit/phpunit": "^10.5|^11|^12|^13",
+        "psr/log": "^2|^3",
+        "rector/rector": "*",
+        "roave/security-advisories": "dev-latest",
+        "symfony/filesystem": "^6.4|^7.4|^8",
+        "symfony/framework-bundle": "^6.4|^7.4|^8",
+        "symfony/test-pack": "^1.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "symfony/runtime": true
+        },
+        "sort-packages": true
+    }
 }
