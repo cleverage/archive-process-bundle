@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Changes
+* [cleverage/process-bundle#143](https://github.com/cleverage/process-bundle/issues/143) ZipTask and UnzipTask: `getOptions()` returns an `array` (it was `?array`), and the options are no longer read on initialization (they depend on the input, and are resolved on every execution). Compatible with cleverage/process-bundle v6.0, where `AbstractConfigurableTask::getOptions()` returns an `array`: allow `cleverage/process-bundle` `^6.0`.
+
 v2.3
 ------
 
