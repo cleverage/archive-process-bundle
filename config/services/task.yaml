@@ -1,14 +1,30 @@
 services:
-    cleverage_archive_process.task.unzip:
-        class: CleverAge\ArchiveProcessBundle\Task\UnzipTask
-        shared: false
-    CleverAge\ArchiveProcessBundle\Task\UnzipTask:
-        alias: cleverage_archive_process.task.unzip
+    _defaults:
+        # Public for the direct access from the service container, deprecated since 2.3: private in 3.0
         public: true
+        tags:
+            - { name: container.private, package: cleverage/archive-process-bundle, version: '2.3' }
 
-    cleverage_archive_process.task.zip:
-        class: CleverAge\ArchiveProcessBundle\Task\ZipTask
+    CleverAge\ArchiveProcessBundle\Task\UnzipTask:
         shared: false
+        tags:
+            - { name: cleverage.task, code: archive_unzip }
+    cleverage_archive_process.task.unzip:
+        alias: CleverAge\ArchiveProcessBundle\Task\UnzipTask
+        public: false
+        deprecated:
+            package: cleverage/archive-process-bundle
+            version: '2.3'
+            message: 'The "%alias_id%" service alias is deprecated, use the "archive_unzip" task code or the class name of the task instead. It will be removed in 3.0.'
+
     CleverAge\ArchiveProcessBundle\Task\ZipTask:
-        alias: cleverage_archive_process.task.zip
-        public: true
+        shared: false
+        tags:
+            - { name: cleverage.task, code: archive_zip }
+    cleverage_archive_process.task.zip:
+        alias: CleverAge\ArchiveProcessBundle\Task\ZipTask
+        public: false
+        deprecated:
+            package: cleverage/archive-process-bundle
+            version: '2.3'
+            message: 'The "%alias_id%" service alias is deprecated, use the "archive_zip" task code or the class name of the task instead. It will be removed in 3.0.'

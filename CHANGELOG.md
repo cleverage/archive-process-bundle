@@ -4,6 +4,22 @@ Latest
 ### Changes
 * [cleverage/process-bundle#143](https://github.com/cleverage/process-bundle/issues/143) ZipTask and UnzipTask: `getOptions()` returns an `array` (it was `?array`), and the options are no longer read on initialization (they depend on the input, and are resolved on every execution). Compatible with cleverage/process-bundle v6.0, where `AbstractConfigurableTask::getOptions()` returns an `array`: allow `cleverage/process-bundle` `^6.0`.
 
+v2.3
+------
+
+### Changes
+* Require `cleverage/process-bundle` `^5.4`.
+* Please follow [UPGRADE.md v2.3](UPGRADE.md#v23)
+* [#47](https://github.com/cleverage/archive-process-bundle/issues/47) The configuration key of the bundle (its extension alias) is `cleverage_archive_process`, instead of `clever_age_archive_process` (no option could be configured there). Configuring a key under `cleverage_archive_process` is deprecated: the bundle has no configuration and the keys were ignored without notice (new internal `Configuration`, empty; notice when the container is compiled). They will be rejected in 3.0. Require `symfony/deprecation-contracts`, used directly. Update documentation, add tests.
+* [#45](https://github.com/cleverage/archive-process-bundle/issues/45) The bundle throws exceptions implementing `ProcessExceptionInterface` of the process bundle instead of raw SPL exceptions (as [cleverage/process-bundle#317](https://github.com/cleverage/process-bundle/issues/317)): new `Exception\UnexpectedValueException` and `Exception\RuntimeException`, extending the SPL exceptions thrown before (same messages, the existing `catch` keep working). Add tests.
+* [#43](https://github.com/cleverage/archive-process-bundle/issues/43) Composer: require PHP `^8.2` instead of `>=8.2` (PHP 9 is no longer accepted before being tested), remove the authorization of the `symfony/flex` plugin, which is not required (the CI installs it globally), as [cleverage/process-bundle#319](https://github.com/cleverage/process-bundle/issues/319).
+* [#38](https://github.com/cleverage/archive-process-bundle/issues/38) Define the public API (Symfony BC promise, as [cleverage/process-bundle#279](https://github.com/cleverage/process-bundle/issues/279)): `ZipTask`, `UnzipTask` and `CleverAgeArchiveProcessBundle` are marked `@final since 2.3`, they will be `final` in 3.0: extending them triggers a deprecation with the Symfony `DebugClassLoader`. `CleverAgeArchiveProcessExtension` is marked `@internal`.
+* [#37](https://github.com/cleverage/archive-process-bundle/issues/37) `CleverAgeArchiveProcessExtension::findServices()` loads the service definition files with a glob pattern instead of a `Finder` (same files, as [cleverage/process-bundle#271](https://github.com/cleverage/process-bundle/issues/271)), `symfony/finder` is no longer required. Add tests.
+* [#35](https://github.com/cleverage/archive-process-bundle/issues/35) Require `symfony/polyfill-php83`, `symfony/polyfill-php84` and `symfony/polyfill-php85` ([cleverage/process-bundle#299](https://github.com/cleverage/process-bundle/issues/299)): the functions of PHP 8.3 to 8.5 can be used while supporting PHP 8.2. Rector targets PHP 8.2 (`withPhpVersion()`, `withPhpSets()` read from `composer.json`) and applies the rules using a newer function when its polyfill is required (no change in the current code).
+* [#31](https://github.com/cleverage/archive-process-bundle/issues/31) Give a code to the tasks ([cleverage/process-bundle#91](https://github.com/cleverage/process-bundle/issues/91)): `archive_zip` and `archive_unzip` (`task: archive_zip`, with `cleverage/process-bundle` 5.4 or later, referencing them by `service` being deprecated there). The tasks have their class name as service id; fetching them directly from the service container is deprecated (`container.private`), they will be private in 3.0. The former ids `cleverage_archive_process.task.zip` / `cleverage_archive_process.task.unzip` are deprecated aliases, removed in 3.0. Update documentation, add tests.
+* [#29](https://github.com/cleverage/archive-process-bundle/issues/29) CI: test the lowest versions allowed by `composer.json` (`--prefer-lowest`, PHP 8.2).
+* [#27](https://github.com/cleverage/archive-process-bundle/issues/27) Add a `.gitattributes`: the development files (`.docker/`, `.github/`, `tests/`, quality tools and PHPUnit configurations, `Makefile`) are no longer part of the archive installed by Composer (`dist`).
+
 v2.2
 ------
 

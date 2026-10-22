@@ -25,7 +25,7 @@ clever_age_process:
                                   context: ~
             tasks:
                 prepare:
-                    service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+                    task: transformer
                     options:
                         transformers:
                             wrapper:
@@ -33,28 +33,28 @@ clever_age_process:
                     outputs: [unzip]
 
                 unzip:
-                    service: '@CleverAge\ArchiveProcessBundle\Task\UnzipTask'
+                    task: archive_unzip
                     options:
                         destination: '%kernel.project_dir%/var/imports/archive'
                     outputs: [browse]
 
                 browse:
-                    service: '@CleverAge\ProcessBundle\Task\File\InputFolderBrowserTask'
+                    task: input_folder_browser
                     options:
                         name_pattern: '*.csv'
                     outputs: [read]
 
                 read:
-                    service: '@CleverAge\ProcessBundle\Task\File\Csv\InputCsvReaderTask'
+                    task: input_csv_reader
                     options:
                         delimiter: ';'
                     outputs: [count_rows, log_row]
 
                 count_rows:
-                    service: '@CleverAge\ProcessBundle\Task\Reporting\StatCounterTask'
+                    task: stat_counter
 
                 log_row:
-                    service: '@CleverAge\ProcessBundle\Task\Reporting\LoggerTask'
+                    task: logger
                     options:
                         level: info
                         message: 'Imported line' # Replace this task by your own transformation / loading tasks

@@ -17,26 +17,41 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\Finder\Finder;
 
+/**
+ * @internal
+ */
 class CleverAgeArchiveProcessExtension extends Extension
 {
+    #[\Override]
+    public function getAlias(): string
+    {
+        return 'cleverage_archive_process';
+    }
+
     public function load(array $configs, ContainerBuilder $container): void
     {
+        $keys = array_keys(array_merge(...$configs));
+        if ([] !== $keys) {
+            trigger_deprecation(
+                'cleverage/archive-process-bundle',
+                '2.3',
+                'Configuring "%s" is deprecated, the bundle has no configuration: the keys "%s" are ignored. They will be rejected in 3.0.',
+                $this->getAlias(),
+                implode('", "', $keys),
+            );
+        }
+        $this->processConfiguration(new Configuration(), $configs);
+
         $this->findServices($container, __DIR__.'/../../config/services');
     }
 
     /**
-     * Recursively import config files into container.
+     * Import the service definition files of a directory into the container.
      */
     protected function findServices(ContainerBuilder $container, string $path, string $extension = 'yaml'): void
     {
-        $finder = new Finder();
-        $finder->in($path)
-            ->name('*.'.$extension)->files();
         $loader = new YamlFileLoader($container, new FileLocator($path));
-        foreach ($finder as $file) {
-            $loader->load($file->getFilename());
-        }
+        $loader->import('*.'.$extension, 'glob');
     }
 }

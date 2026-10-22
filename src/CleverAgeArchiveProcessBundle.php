@@ -13,10 +13,28 @@ declare(strict_types=1);
 
 namespace CleverAge\ArchiveProcessBundle;
 
+use CleverAge\ArchiveProcessBundle\DependencyInjection\CleverAgeArchiveProcessExtension;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * @final since 2.3
+ */
 class CleverAgeArchiveProcessBundle extends Bundle
 {
+    /**
+     * The alias of the extension, "cleverage_archive_process", is not the one guessed from the bundle name.
+     */
+    #[\Override]
+    public function getContainerExtension(): ExtensionInterface
+    {
+        if (!$this->extension instanceof ExtensionInterface) {
+            $this->extension = new CleverAgeArchiveProcessExtension();
+        }
+
+        return $this->extension;
+    }
+
     #[\Override]
     public function getPath(): string
     {
