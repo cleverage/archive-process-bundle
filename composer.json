@@ -60,6 +60,8 @@
         "friendsofphp/php-cs-fixer": "*",
         "phpstan/extension-installer": "*",
         "phpstan/phpstan": "*",
+        "phpstan/phpstan-deprecation-rules": "*",
+        "phpstan/phpstan-phpunit": "*",
         "phpstan/phpstan-symfony": "*",
         "phpunit/phpunit": "^10.5|^11|^12|^13",
         "psr/log": "^2|^3",
