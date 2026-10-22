@@ -61,7 +61,7 @@
         "phpstan/extension-installer": "*",
         "phpstan/phpstan": "*",
         "phpstan/phpstan-symfony": "*",
-        "phpunit/phpunit": "^11.5.50|^12|^13",
+        "phpunit/phpunit": "^10.5|^11|^12|^13",
         "psr/log": "^2|^3",
         "rector/rector": "*",
         "roave/security-advisories": "dev-latest",
