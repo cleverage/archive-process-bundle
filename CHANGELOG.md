@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Changes
+* [#62](https://github.com/cleverage/archive-process-bundle/issues/62) Cookbook: task codes instead of the deprecated `service:`, broken link; exceptions of the bundle in the reference pages.
+
 v2.3
 ------
 
