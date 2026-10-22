@@ -54,9 +54,6 @@ class KernelTest extends KernelTestCase
 
     public function testTasksAreResolvedByCode(): void
     {
-        if (!class_exists(TaskRegistry::class)) {
-            self::markTestSkipped('The tasks are referenced by code since cleverage/process-bundle 5.4.');
-        }
         $processConfigurationRegistry = self::getContainer()->get('test.process_configuration_registry');
         self::assertInstanceOf(ProcessConfigurationRegistry::class, $processConfigurationRegistry);
         $taskRegistry = self::getContainer()->get('test.task_registry');
