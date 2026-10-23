@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace CleverAge\ArchiveProcessBundle\Tests\Task;
 
+use CleverAge\ArchiveProcessBundle\Exception\RuntimeException;
 use CleverAge\ArchiveProcessBundle\Task\UnzipTask;
 use CleverAge\ProcessBundle\Configuration\ProcessConfiguration;
 use CleverAge\ProcessBundle\Configuration\TaskConfiguration;
@@ -231,6 +232,54 @@ class UnzipTaskTest extends TestCase
         $task->execute($state);
 
         return $state->getOutput();
+    }
+
+    public function testMaxFilesIsChecked(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+            'max_files' => 0,
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('The extraction should have failed');
+        } catch (RuntimeException $e) {
+            self::assertSame("Unable to extract file {$this->dir}/archive1.zip: it contains 1 entries, more than the max_files option (0)", $e->getMessage());
+        }
+        self::assertDirectoryDoesNotExist($this->dir.'/destination');
+    }
+
+    public function testMaxSizeIsChecked(): void
+    {
+        // "content of file1.txt": 20 bytes
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+            'max_size' => 19,
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('The extraction should have failed');
+        } catch (RuntimeException $e) {
+            self::assertSame("Unable to extract file {$this->dir}/archive1.zip: its uncompressed size is more than the max_size option (19 bytes)", $e->getMessage());
+        }
+        self::assertDirectoryDoesNotExist($this->dir.'/destination');
+    }
+
+    public function testArchiveWithinTheLimitsIsExtracted(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+            'max_files' => 1,
+            'max_size' => 20,
+        ]);
+
+        self::assertSame($this->dir.'/destination', $this->execute($task, $state, null));
+        self::assertFileExists($this->dir.'/destination/file1.txt');
     }
 
     private function createArchive(string $filename, string $entry): void

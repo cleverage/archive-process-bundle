@@ -14,7 +14,7 @@ Accepted inputs
 ---------------
 
 `array` or `null`: the input array is merged with the task options, input values taking precedence over the
-configured ones. It may only contain the `filename` and/or `destination` keys (any other key throws an
+configured ones. It may only contain option keys (`filename`, `destination`, `max_files`, `max_size`; any other key throws an
 `UndefinedOptionsException`). A `null` input is handled as an empty array, so the options come from the task
 configuration only.
 
@@ -35,8 +35,10 @@ Options
 |---------------|----------|:--------:|---------|---------------------------------------------------------------------------------------------------|
 | `filename`    | `string` |  **X**   |         | Path of the zip archive to extract. It must exist and be readable (`UnexpectedValueException`)   |
 | `destination` | `string` |  **X**   |         | Directory where the archive content is extracted                                                  |
+| `max_files`   | `?int`   |          | `null`  | Maximum number of entries of the archive (`null`: no limit)                                       |
+| `max_size`    | `?int`   |          | `null`  | Maximum total uncompressed size of the entries, in bytes (`null`: no limit)                       |
 
-Both options are required, but they can be provided either in the task configuration or in the input.
+`filename` and `destination` are required, but they can be provided either in the task configuration or in the input.
 They are validated when the task is executed, not at process initialization.
 
 Examples
@@ -84,3 +86,7 @@ Notes
 * Options are resolved on each execution of the task: when the task receives several inputs (e.g. after an iterable
   task), each input is extracted with its own `filename` and `destination`.
 * See the [Import the CSV files of an uploaded archive](../../cookbooks/import_archive.md) cookbook.
+* With an archive that is not trusted (received from a partner, uploaded by a user...), set `max_files` and `max_size`
+  to protect the server against "zip bombs": they are checked from the central directory of the archive before
+  anything is extracted, and the task fails with a `RuntimeException` when a limit is exceeded. An extraction failing
+  for another reason (e.g. a write error) may leave the entries already extracted in the destination directory.
