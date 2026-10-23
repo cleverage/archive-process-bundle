@@ -1,6 +1,9 @@
 Latest
 ------
 
+v2.4
+------
+
 ### Changes
 * [#55](https://github.com/cleverage/archive-process-bundle/issues/55) `UnzipTask` (`archive_unzip`): new `max_files` and `max_size` options (default `null`, no limit) to protect the server against "zip bombs": the number of entries and their total uncompressed size are checked before anything is extracted, the task fails with a `RuntimeException` when a limit is exceeded. Update documentation, add tests.
 * [#62](https://github.com/cleverage/archive-process-bundle/issues/62) Cookbook: task codes instead of the deprecated `service:`, broken link; exceptions of the bundle in the reference pages.

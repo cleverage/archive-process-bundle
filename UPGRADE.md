@@ -1,6 +1,11 @@
 Upgrade Guide
 =============
 
+## v2.4
+
+No deprecation and no change requiring an action. `archive_unzip` has new `max_files` and `max_size` options (no limit
+by default): set them when the archives come from an untrusted source.
+
 ## v2.3
 
 Unless stated otherwise, the deprecations below trigger a notice (`Since cleverage/archive-process-bundle 2.3: ...`)
