@@ -33,6 +33,12 @@
             "role": "Maintainer"
         }
     ],
+    "support": {
+        "issues": "https://github.com/cleverage/archive-process-bundle/issues",
+        "source": "https://github.com/cleverage/archive-process-bundle",
+        "docs": "https://github.com/cleverage/archive-process-bundle/blob/main/docs/index.md",
+        "security": "https://github.com/cleverage/archive-process-bundle/security/policy"
+    },
     "autoload": {
         "psr-4": {
             "CleverAge\\ArchiveProcessBundle\\": "src/"
@@ -71,8 +77,7 @@
     },
     "config": {
         "allow-plugins": {
-            "phpstan/extension-installer": true,
-            "symfony/runtime": true
+            "phpstan/extension-installer": true
         },
         "sort-packages": true
     }

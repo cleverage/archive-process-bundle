@@ -6,17 +6,8 @@
 .phpunit.result.cache
 .phpunit.cache
 .php-cs-fixer.cache
+/.php-cs-fixer.php
 coverage-report
-
-###> phpunit/phpunit ###
-/phpunit.xml
-.phpunit.result.cache
-###< phpunit/phpunit ###
-
-###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -27,8 +18,3 @@ coverage-report
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
-
-###> friendsofphp/php-cs-fixer ###
-/.php-cs-fixer.php
-/.php-cs-fixer.cache
-###< friendsofphp/php-cs-fixer ###
