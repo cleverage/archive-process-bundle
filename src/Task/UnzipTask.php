@@ -35,7 +35,7 @@ class UnzipTask extends AbstractConfigurableTask
             throw new UnexpectedValueException(\sprintf('UnzipTask expects an array or null input, %s given', get_debug_type($state->getInput())));
         }
         /**
-         * @var array{filename: string, destination: string} $options
+         * @var array{filename: string, destination: string, max_files: ?int, max_size: ?int} $options
          */
         $options = $this->getOptions($state);
         $filename = $options['filename'];
@@ -56,6 +56,14 @@ class UnzipTask extends AbstractConfigurableTask
             throw new RuntimeException("Unable to open file {$filename} with code {$res}");
         }
 
+        try {
+            $this->checkLimits($zipArchive, $filename, $options['max_files'], $options['max_size']);
+        } catch (RuntimeException $e) {
+            $zipArchive->close();
+
+            throw $e;
+        }
+
         // The PHP warning is replaced by the exception below
         error_clear_last();
         $extracted = @$zipArchive->extractTo($dest);
@@ -68,15 +76,46 @@ class UnzipTask extends AbstractConfigurableTask
         $state->setOutput($dest);
     }
 
+    /**
+     * Checks the archive against the limits before extracting anything (protection against zip bombs): the number of
+     * entries and their uncompressed sizes are read from the central directory of the archive.
+     */
+    protected function checkLimits(\ZipArchive $zipArchive, string $filename, ?int $maxFiles, ?int $maxSize): void
+    {
+        if (null !== $maxFiles && $zipArchive->numFiles > $maxFiles) {
+            throw new RuntimeException("Unable to extract file {$filename}: it contains {$zipArchive->numFiles} entries, more than the max_files option ({$maxFiles})");
+        }
+        if (null === $maxSize) {
+            return;
+        }
+        $size = 0;
+        for ($index = 0; $index < $zipArchive->numFiles; ++$index) {
+            $stat = $zipArchive->statIndex($index);
+            if (false === $stat) {
+                throw new RuntimeException("Unable to extract file {$filename}: the entry {$index} cannot be read");
+            }
+            $size += $stat['size'];
+            if ($size > $maxSize) {
+                throw new RuntimeException("Unable to extract file {$filename}: its uncompressed size is more than the max_size option ({$maxSize} bytes)");
+            }
+        }
+    }
+
     protected function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setRequired(['filename', 'destination']);
         $resolver->setAllowedTypes('filename', ['string']);
         $resolver->setAllowedTypes('destination', ['string']);
+        $resolver->setDefaults([
+            'max_files' => null,
+            'max_size' => null,
+        ]);
+        $resolver->setAllowedTypes('max_files', ['null', 'int']);
+        $resolver->setAllowedTypes('max_size', ['null', 'int']);
     }
 
     /**
-     * @return array{filename: string, destination: string}|null
+     * @return array{filename: string, destination: string, max_files: ?int, max_size: ?int}|null
      */
     #[\Override]
     protected function getOptions(ProcessState $state): ?array
