@@ -34,7 +34,7 @@ clever_age_process:
             help: 'bin/console cleverage:process:execute app.export_archive_upload'
             tasks:
                 read:
-                    service: '@CleverAge\DoctrineProcessBundle\Task\Database\DatabaseReaderTask'
+                    task: doctrine_database_reader
                     options:
                         table: 'book'
                         sql: 'SELECT b.id, b.title FROM book b ORDER BY b.id'
@@ -71,7 +71,7 @@ clever_age_process:
                     outputs: [upload]
 
                 upload:
-                    service: '@CleverAge\FlysystemProcessBundle\Task\FileFetchTask'
+                    task: flysystem_file_fetch
                     options:
                         source_filesystem: 'local.storage'
                         destination_filesystem: 'remote.storage'
@@ -101,7 +101,7 @@ How it works:
   the absolute path of the archive.
 - The [callback](https://github.com/cleverage/process-bundle/blob/main/docs/reference/transformers/callback_transformer.md)
   transformer turns this absolute path into a path relative to the `local.storage` root, as expected by the
-  [FileFetchTask](https://github.com/cleverage/flysystem-process-bundle/blob/main/docs/reference/tasks/01-FileFetchTask.md),
+  [FileFetchTask](https://github.com/cleverage/flysystem-process-bundle/blob/main/docs/reference/tasks/file_fetch_task.md),
   which copies the archive to `remote.storage` and removes the local one (`remove_source: true`).
 - The [LoggerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/logger_task.md) logs the
   uploaded file name.
