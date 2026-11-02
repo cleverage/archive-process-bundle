@@ -1,6 +1,14 @@
 Upgrade Guide
 =============
 
+## v2.5
+
+### `archive_unzip` limits in the input
+
+`max_files` and `max_size` given by the input of `archive_unzip` are deprecated
+(`Since cleverage/archive-process-bundle 2.5: The "max_size" key of the input...`) and will be ignored in 3.0: set them
+in the task options.
+
 ## v2.4
 
 No deprecation and no change requiring an action. `archive_unzip` has new `max_files` and `max_size` options (no limit

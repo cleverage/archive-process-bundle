@@ -77,8 +77,9 @@ class UnzipTask extends AbstractConfigurableTask
     }
 
     /**
-     * Checks the archive against the limits before extracting anything (protection against zip bombs): the number of
-     * entries and their uncompressed sizes are read from the central directory of the archive.
+     * Checks the archive against the limits before extracting anything (protection against zip bombs). The number of
+     * entries and the uncompressed sizes declared in the central directory are checked first, then the bytes actually
+     * decompressed from each entry are counted: the declared sizes are controlled by the author of the archive.
      */
     protected function checkLimits(\ZipArchive $zipArchive, string $filename, ?int $maxFiles, ?int $maxSize): void
     {
@@ -96,9 +97,46 @@ class UnzipTask extends AbstractConfigurableTask
             }
             $size += $stat['size'];
             if ($size > $maxSize) {
-                throw new RuntimeException("Unable to extract file {$filename}: its uncompressed size is more than the max_size option ({$maxSize} bytes)");
+                throw $this->createMaxSizeException($filename, $maxSize);
             }
         }
+        $size = 0;
+        for ($index = 0; $index < $zipArchive->numFiles; ++$index) {
+            $size += $this->countEntryBytes($zipArchive, $filename, $index, $maxSize, $maxSize - $size);
+        }
+    }
+
+    /**
+     * Decompresses the entry without writing it, up to the remaining size: more bytes exceed the max_size option.
+     */
+    private function countEntryBytes(\ZipArchive $zipArchive, string $filename, int $index, int $maxSize, int $remainingSize): int
+    {
+        $stream = $zipArchive->getStreamIndex($index);
+        if (false === $stream) {
+            throw new RuntimeException("Unable to extract file {$filename}: the entry {$index} cannot be read");
+        }
+        $size = 0;
+        try {
+            while (!feof($stream)) {
+                $chunk = fread($stream, 65536);
+                if (false === $chunk) {
+                    throw new RuntimeException("Unable to extract file {$filename}: the entry {$index} cannot be read");
+                }
+                $size += \strlen($chunk);
+                if ($size > $remainingSize) {
+                    throw $this->createMaxSizeException($filename, $maxSize);
+                }
+            }
+        } finally {
+            fclose($stream);
+        }
+
+        return $size;
+    }
+
+    private function createMaxSizeException(string $filename, int $maxSize): RuntimeException
+    {
+        return new RuntimeException("Unable to extract file {$filename}: its uncompressed size is more than the max_size option ({$maxSize} bytes)");
     }
 
     protected function configureOptions(OptionsResolver $resolver): void
@@ -122,6 +160,11 @@ class UnzipTask extends AbstractConfigurableTask
     {
         // The options depend on the input: resolve them on every execution
         if (\is_array($state->getInput())) {
+            foreach (['max_files', 'max_size'] as $limit) {
+                if (\array_key_exists($limit, $state->getInput())) {
+                    trigger_deprecation('cleverage/archive-process-bundle', '2.5', 'The "%s" key of the input of the "archive_unzip" task (UnzipTask) is deprecated: set the limits in the task options only, an input coming from the processed data must not disable them. It will be ignored in 3.0.', $limit);
+                }
+            }
             $resolver = new OptionsResolver();
             $this->configureOptions($resolver);
             /** @var array<string, mixed> $options */
