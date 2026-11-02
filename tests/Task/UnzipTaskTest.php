@@ -282,6 +282,94 @@ class UnzipTaskTest extends TestCase
         self::assertFileExists($this->dir.'/destination/file1.txt');
     }
 
+    public function testMaxSizeIsCheckedOnTheDecompressedBytes(): void
+    {
+        // 100 000 bytes declared as 10 bytes in the archive
+        $this->createForgedArchive($this->dir.'/forged.zip', 100000, 10);
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/forged.zip',
+            'destination' => $this->dir.'/destination',
+            'max_size' => 1000,
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('The extraction should have failed');
+        } catch (RuntimeException $e) {
+            self::assertSame("Unable to extract file {$this->dir}/forged.zip: its uncompressed size is more than the max_size option (1000 bytes)", $e->getMessage());
+        }
+        self::assertDirectoryDoesNotExist($this->dir.'/destination');
+    }
+
+    public function testMaxSizeIsCheckedOnTheWholeArchive(): void
+    {
+        // Two entries of 20 bytes: 40 bytes in all
+        $zip = new \ZipArchive();
+        self::assertTrue($zip->open($this->dir.'/archive1.zip'));
+        $zip->addFromString('file3.txt', 'content of file3.txt');
+        $zip->close();
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+            'max_size' => 39,
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('its uncompressed size is more than the max_size option (39 bytes)');
+
+        $this->execute($task, $state, null);
+    }
+
+    public function testLimitsInTheInputAreDeprecated(): void
+    {
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive1.zip',
+            'destination' => $this->dir.'/destination',
+            'max_size' => 19,
+        ]);
+
+        $deprecations = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$deprecations): bool {
+            $deprecations[] = $errstr;
+
+            return true;
+        }, \E_USER_DEPRECATED);
+        try {
+            // Still applied until 3.0
+            self::assertSame($this->dir.'/destination', $this->execute($task, $state, ['max_size' => null, 'max_files' => 1]));
+        } finally {
+            restore_error_handler();
+        }
+
+        self::assertSame([
+            'Since cleverage/archive-process-bundle 2.5: The "max_files" key of the input of the "archive_unzip" task (UnzipTask) is deprecated: set the limits in the task options only, an input coming from the processed data must not disable them. It will be ignored in 3.0.',
+            'Since cleverage/archive-process-bundle 2.5: The "max_size" key of the input of the "archive_unzip" task (UnzipTask) is deprecated: set the limits in the task options only, an input coming from the processed data must not disable them. It will be ignored in 3.0.',
+        ], $deprecations);
+    }
+
+    /**
+     * An archive whose entry declares a wrong uncompressed size, in its local header and in the central directory.
+     */
+    private function createForgedArchive(string $filename, int $size, int $declaredSize): void
+    {
+        $zip = new \ZipArchive();
+        self::assertTrue($zip->open($filename, \ZipArchive::CREATE));
+        $zip->addFromString('bomb.txt', str_repeat('a', $size));
+        $zip->close();
+
+        $content = (string) file_get_contents($filename);
+        $declared = pack('V', $declaredSize);
+        // Local file header: uncompressed size at offset 22
+        $local = strpos($content, "PK\x03\x04");
+        self::assertIsInt($local);
+        $content = substr_replace($content, $declared, $local + 22, 4);
+        // Central directory file header: uncompressed size at offset 24
+        $central = strpos($content, "PK\x01\x02");
+        self::assertIsInt($central);
+        $content = substr_replace($content, $declared, $central + 24, 4);
+        file_put_contents($filename, $content);
+    }
+
     private function createArchive(string $filename, string $entry): void
     {
         $zip = new \ZipArchive();

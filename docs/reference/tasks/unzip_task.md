@@ -15,7 +15,8 @@ Accepted inputs
 
 `array` or `null`: the input array is merged with the task options, input values taking precedence over the
 configured ones. It may only contain option keys (`filename`, `destination`, `max_files`, `max_size`; any other key throws an
-`UndefinedOptionsException`). A `null` input is handled as an empty array, so the options come from the task
+`UndefinedOptionsException`). `max_files` and `max_size` in the input are deprecated since 2.5 and will be ignored in
+3.0: set the limits in the task options, an input coming from the processed data must not disable them. A `null` input is handled as an empty array, so the options come from the task
 configuration only.
 
 Any other input type (e.g. a `string` file path) is not supported and throws an `UnexpectedValueException`: convert it into an array first, for instance with a
@@ -87,6 +88,8 @@ Notes
   task), each input is extracted with its own `filename` and `destination`.
 * See the [Import the CSV files of an uploaded archive](../../cookbooks/import_archive.md) cookbook.
 * With an archive that is not trusted (received from a partner, uploaded by a user...), set `max_files` and `max_size`
-  to protect the server against "zip bombs": they are checked from the central directory of the archive before
-  anything is extracted, and the task fails with a `RuntimeException` when a limit is exceeded. An extraction failing
+  to protect the server against "zip bombs": they are checked before anything is extracted, and the task fails with a
+  `RuntimeException` when a limit is exceeded. `max_size` is checked on the sizes declared in the central directory of
+  the archive, then on the bytes actually decompressed from its entries (the declared sizes can be forged): the
+  archive is decompressed twice, up to `max_size` bytes, without writing anything before the extraction. An extraction failing
   for another reason (e.g. a write error) may leave the entries already extracted in the destination directory.
