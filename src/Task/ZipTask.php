@@ -39,17 +39,80 @@ class ZipTask extends AbstractConfigurableTask
          */
         $options = $this->getOptions($state);
 
-        $zip = new \ZipArchive();
-        $ret = $zip->open($options['filename'], \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-        if (true !== $ret) {
-            throw new RuntimeException("Fail to open file {$options['filename']} with code {$ret}");
+        $files = $this->getFiles($options);
+        $filename = $options['filename'];
+        // Written next to the archive, then renamed once complete: on a failure, the ZipArchive destructor writes the
+        // files added so far, an existing archive was replaced by a partial one
+        $temporaryFilename = \dirname($filename).\DIRECTORY_SEPARATOR.'.'.basename($filename).'.'.bin2hex(random_bytes(8)).'.tmp';
+
+        if (is_dir($filename)) {
+            throw new RuntimeException("Fail to open file {$filename}: it is a directory");
         }
 
+        $zip = new \ZipArchive();
+        $ret = $zip->open($temporaryFilename, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        if (true !== $ret) {
+            throw new RuntimeException("Fail to open file {$filename} with code {$ret}");
+        }
+
+        try {
+            foreach ($files as [$currentFilepath, $currentFilename]) {
+                // The PHP warning is replaced by the exception below
+                if (false === @$zip->addFile($currentFilepath, $currentFilename)) {
+                    throw new RuntimeException("Unable to add file {$currentFilepath} to zip");
+                }
+            }
+
+            // The archive is written on close: the PHP warning is replaced by the exception below
+            if (!@$zip->close()) {
+                throw new RuntimeException("Unable to write zip file {$filename}: {$zip->getStatusString()}");
+            }
+        } catch (\Throwable $exception) {
+            // Closed (written) now, not by the destructor once the temporary file is removed
+            try {
+                @$zip->close();
+            } catch (\Throwable) {
+                // Already closed
+            }
+            @unlink($temporaryFilename);
+
+            throw $exception;
+        }
+
+        if (!is_file($temporaryFilename)) {
+            // An archive without file is not written: an existing one is removed, as when written in place
+            if (is_file($filename) && !@unlink($filename)) {
+                throw new RuntimeException("Unable to remove the zip file {$filename}");
+            }
+        } else {
+            if (is_file($filename)) {
+                // Keep the permissions of the replaced archive
+                @chmod($temporaryFilename, fileperms($filename) & 0o7777);
+            }
+            if (!@rename($temporaryFilename, $filename)) {
+                @unlink($temporaryFilename);
+                throw new RuntimeException("Unable to write zip file {$filename}: cannot rename the temporary file");
+            }
+        }
+
+        $state->setOutput($options['filename']);
+    }
+
+    /**
+     * The files to add (path and entry name), checked before the archive is opened.
+     *
+     * @param array{filename: string, files: array<string>|string, files_base_path: string} $options
+     *
+     * @return list<array{string, string}>
+     */
+    protected function getFiles(array $options): array
+    {
         $files = $options['files'];
         if (\is_string($files)) {
             $files = [$files];
         }
         $basePath = rtrim($options['files_base_path'], \DIRECTORY_SEPARATOR);
+        $checkedFiles = [];
         foreach ($files as $file) {
             if ('' === $options['files_base_path']) {
                 // No base path: the file is read at the given path (absolute or relative to the current directory)
@@ -69,17 +132,13 @@ class ZipTask extends AbstractConfigurableTask
             if (!is_readable($currentFilepath)) {
                 throw new UnexpectedValueException("File is not readable: '{$currentFilepath}'");
             }
-            if (false === $zip->addFile($currentFilepath, $currentFilename)) {
-                throw new RuntimeException("Unable to add file {$currentFilepath} to zip");
+            if (!is_file($currentFilepath)) {
+                throw new UnexpectedValueException("Not a file: '{$currentFilepath}'");
             }
+            $checkedFiles[] = [$currentFilepath, $currentFilename];
         }
 
-        // The archive is written on close: the PHP warning is replaced by the exception below
-        if (!@$zip->close()) {
-            throw new RuntimeException("Unable to write zip file {$options['filename']}: {$zip->getStatusString()}");
-        }
-
-        $state->setOutput($options['filename']);
+        return $checkedFiles;
     }
 
     protected function configureOptions(OptionsResolver $resolver): void

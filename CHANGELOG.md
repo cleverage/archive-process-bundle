@@ -5,6 +5,7 @@ Latest
 * [#69](https://github.com/cleverage/archive-process-bundle/issues/69) `UnzipTask` (`archive_unzip`): `max_files` and `max_size` given by the input are deprecated, they will be ignored in 3.0: an input coming from the processed data (e.g. `max_size: null`) could disable the limits set in the task options. Update documentation, add tests.
 
 ### Fixes
+* [#71](https://github.com/cleverage/archive-process-bundle/issues/71) `ZipTask` (`archive_zip`): the files are checked before the archive is opened, and the archive is written to a temporary file next to `filename`, renamed once complete: a missing or unreadable file, or a file that cannot be added, no longer replaces an existing archive with a partial one (written by the `ZipArchive` destructor). The permissions of a replaced archive are kept. Update documentation, add tests.
 * [#68](https://github.com/cleverage/archive-process-bundle/issues/68) `UnzipTask` (`archive_unzip`): `max_size` (#55) is also checked on the bytes actually decompressed from the entries, before anything is extracted: an archive declaring wrong uncompressed sizes in its central directory (forged "zip bomb") no longer passes the limit. Update documentation, add tests.
 
 v2.4

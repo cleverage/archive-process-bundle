@@ -174,6 +174,97 @@ class ZipTaskTest extends TestCase
         self::assertSame(['file1.txt'], $this->getEntries($this->dir.'/archive.zip'));
     }
 
+    /**
+     * The ZipArchive destructor wrote the files added before the failure: the existing archive was replaced by a partial
+     * one.
+     */
+    public function testExistingArchiveIsKeptWhenAFileIsMissing(): void
+    {
+        $this->createExistingArchive();
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive.zip',
+            'files' => ['file1.txt', 'missing.txt'],
+            'files_base_path' => $this->dir,
+        ]);
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('An \UnexpectedValueException should have been thrown');
+        } catch (\UnexpectedValueException) {
+        }
+
+        self::assertSame(['old.txt'], $this->getEntries($this->dir.'/archive.zip'));
+        self::assertSame([], glob($this->dir.'/.archive.zip.*'));
+    }
+
+    public function testExistingArchiveIsKeptWhenAFileCannotBeAdded(): void
+    {
+        $this->createExistingArchive();
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive.zip',
+            'files' => 'file1.txt',
+            'files_base_path' => $this->dir,
+        ]);
+        // The file is removed once checked: it cannot be added
+        // @phpstan-ignore class.extendsFinalByPhpDoc (the only way to remove the file between its check and its addition)
+        $task = new class($this->dir.'/file1.txt') extends ZipTask {
+            public function __construct(private readonly string $file)
+            {
+            }
+
+            protected function getFiles(array $options): array
+            {
+                $files = parent::getFiles($options);
+                unlink($this->file);
+
+                return $files;
+            }
+        };
+
+        try {
+            $this->execute($task, $state, null);
+            self::fail('A \RuntimeException should have been thrown');
+        } catch (\RuntimeException $e) {
+            self::assertSame("Unable to add file {$this->dir}/file1.txt to zip", $e->getMessage());
+        }
+
+        self::assertSame(['old.txt'], $this->getEntries($this->dir.'/archive.zip'));
+        self::assertSame([], glob($this->dir.'/.archive.zip.*'));
+    }
+
+    public function testThePermissionsOfTheReplacedArchiveAreKept(): void
+    {
+        $this->createExistingArchive();
+        chmod($this->dir.'/archive.zip', 0o640);
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive.zip',
+            'files' => 'file1.txt',
+            'files_base_path' => $this->dir,
+        ]);
+
+        $this->execute($task, $state, null);
+
+        self::assertSame(['file1.txt'], $this->getEntries($this->dir.'/archive.zip'));
+        self::assertSame(0o640, fileperms($this->dir.'/archive.zip') & 0o777);
+        self::assertSame([], glob($this->dir.'/.archive.zip.*'));
+    }
+
+    /**
+     * No archive is written without file, an existing one is removed (as when written in place by ZipArchive).
+     */
+    public function testNoFile(): void
+    {
+        $this->createExistingArchive();
+        [$task, $state] = $this->createTask([
+            'filename' => $this->dir.'/archive.zip',
+            'files' => [],
+            'files_base_path' => $this->dir,
+        ]);
+
+        self::assertSame($this->dir.'/archive.zip', $this->execute($task, $state, null));
+        self::assertFileDoesNotExist($this->dir.'/archive.zip');
+    }
+
     public function testMissingFile(): void
     {
         [$task, $state] = $this->createTask([
@@ -237,7 +328,7 @@ class ZipTaskTest extends TestCase
             $this->execute($task, $state, null);
             self::fail('A \RuntimeException should have been thrown');
         } catch (\RuntimeException $e) {
-            self::assertStringStartsWith("Fail to open file {$this->dir}/archive.zip with code ", $e->getMessage());
+            self::assertSame("Fail to open file {$this->dir}/archive.zip: it is a directory", $e->getMessage());
         }
     }
 
@@ -264,6 +355,14 @@ class ZipTaskTest extends TestCase
 
         $this->expectException(InvalidOptionsException::class);
         $this->execute($task, $state, ['files' => 12]);
+    }
+
+    private function createExistingArchive(): void
+    {
+        $zip = new \ZipArchive();
+        self::assertTrue($zip->open($this->dir.'/archive.zip', \ZipArchive::CREATE));
+        $zip->addFromString('old.txt', 'old');
+        $zip->close();
     }
 
     /**
