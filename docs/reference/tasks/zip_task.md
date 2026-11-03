@@ -86,17 +86,20 @@ zip:
 Notes
 -----
 
-* Underlying class is [ZipArchive](https://www.php.net/manual/en/class.ziparchive.php), the archive is opened with the
-  `ZipArchive::CREATE | ZipArchive::OVERWRITE` flags. A `RuntimeException` is thrown if it cannot be opened (with the
-  `ZipArchive` error code), or written once all files are added (e.g. when the parent directory of `filename` does not
-  exist, the directory is not created).
+* Underlying class is [ZipArchive](https://www.php.net/manual/en/class.ziparchive.php). The files are checked first
+  (see below), then the archive is written to a temporary file next to `filename` (`.<filename>.<random>.tmp`), renamed
+  to `filename` once complete: on a failure, an existing archive is left unchanged and the temporary file is removed.
+  The permissions of a replaced archive are kept. A `RuntimeException` is thrown if the archive cannot be opened (with
+  the `ZipArchive` error code; `filename` is a directory), or written once all files are added (e.g. when the parent
+  directory of `filename` does not exist, the directory is not created).
+* Without any file, no archive is written, and an existing archive at `filename` is removed.
 * For each file, the entry name is the file path with the leading `files_base_path` removed (only when the path starts
   with it, followed by a directory separator) and leading directory separators trimmed; the file actually read is
   `files_base_path` + directory separator + entry name. Hence all files must be located under `files_base_path`.
 * With the default empty `files_base_path`, the file is read at the given path (absolute, or relative to the current
   directory), and the entries keep this path (without the leading `/`) inside the archive.
-* Each file must exist and be readable, otherwise an `UnexpectedValueException` is thrown. Only files can be added:
-  directories are not browsed.
+* Each file must exist, be readable and be a file (directories are not browsed), otherwise an
+  `UnexpectedValueException` is thrown, before the archive is opened.
 * Options are resolved on each execution of the task: when the task receives several inputs (e.g. after an iterable
   task), each input creates its own archive. To archive a list of files in a single archive, aggregate them first (e.g.
   with an
