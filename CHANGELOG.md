@@ -1,6 +1,9 @@
 Latest
 ------
 
+v2.5
+------
+
 ### Changes
 * [#69](https://github.com/cleverage/archive-process-bundle/issues/69) `UnzipTask` (`archive_unzip`): `max_files` and `max_size` given by the input are deprecated, they will be ignored in 3.0: an input coming from the processed data (e.g. `max_size: null`) could disable the limits set in the task options. Update documentation, add tests.
 
