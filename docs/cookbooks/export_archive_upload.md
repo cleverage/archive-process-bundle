@@ -13,12 +13,10 @@ It requires, besides this bundle, the
 flysystem:
     storages:
         local.storage:
-            adapter: 'local'
-            options:
+            local:
                 directory: '%kernel.project_dir%/var/storage/local'
         remote.storage:
-            adapter: 'sftp'
-            options:
+            sftp:
                 host: '%env(string:SFTP_HOST)%'
                 port: 22
                 username: '%env(string:SFTP_USERNAME)%'

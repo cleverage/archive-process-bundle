@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Changes
+* [#73](https://github.com/cleverage/archive-process-bundle/issues/73) Documentation: the Flysystem storages of the `export_archive_upload` cookbook are configured with the format of league/flysystem-bundle 3.5 and later, the `adapter` / `options` format being deprecated since flysystem-bundle 3.5.
+
 v2.5
 ------
 
