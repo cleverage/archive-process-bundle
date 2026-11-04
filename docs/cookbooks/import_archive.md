@@ -15,14 +15,13 @@ clever_age_process:
             options:
                 ui:
                     ui_launch_mode: form
-                    entrypoint_type: file # The uploaded file path is used as input
-                    constraints:
-                        - Collection:
-                              fields:
-                                  input:
-                                      - File:
-                                            mimeTypes: [application/zip]
-                                  context: ~
+                    form:
+                        input: # The uploaded file path is used as input
+                            type: Symfony\Component\Form\Extension\Core\Type\FileType
+                            options:
+                                constraints:
+                                    - File:
+                                          mimeTypes: [application/zip]
             tasks:
                 prepare:
                     task: transformer
@@ -63,7 +62,7 @@ clever_age_process:
 
 How it works:
 - The process input is the path of the archive (`--input` option, or the uploaded file when launched from the UI with
-  `entrypoint_type: file`). As the [UnzipTask](../reference/tasks/unzip_task.md) only accepts an array input, the
+  a `FileType` input field). As the [UnzipTask](../reference/tasks/unzip_task.md) only accepts an array input, the
   [TransformerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/transformer_task.md)
   wraps it under the `filename` key with the
   [wrapper](https://github.com/cleverage/process-bundle/blob/main/docs/reference/transformers/wrapper_transformer.md)
