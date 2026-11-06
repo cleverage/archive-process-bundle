@@ -2,6 +2,7 @@ Latest
 ------
 
 ### Changes
+* [#77](https://github.com/cleverage/archive-process-bundle/issues/77) Documentation: the `max_size` option of `archive_unzip` decompresses every entry once more to count the bytes, which makes the extraction about 77 % slower. Update documentation.
 * [#75](https://github.com/cleverage/archive-process-bundle/issues/75) Documentation: the `import_archive` cookbook uses the `form` option of cleverage/ui-process-bundle 3.5 instead of the deprecated `entrypoint_type` and `constraints` UI options.
 * [#73](https://github.com/cleverage/archive-process-bundle/issues/73) Documentation: the Flysystem storages of the `export_archive_upload` cookbook are configured with the format of league/flysystem-bundle 3.5 and later, the `adapter` / `options` format being deprecated since flysystem-bundle 3.5.
 
